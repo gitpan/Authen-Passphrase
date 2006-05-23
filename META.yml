@@ -1,0 +1,14 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         Authen-Passphrase
+version:      0.000
+version_from: lib/Authen/Passphrase.pm
+installdirs:  site
+requires:
+    Crypt::PasswdMD5:              1.0
+    Crypt::UnixCrypt_XS:           0.05
+    Digest:                        
+    Digest::MD4:                   
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.30
