@@ -6,6 +6,7 @@ Makefile.PL
 README
 lib/Authen/Passphrase.pm
 lib/Authen/Passphrase/AcceptAll.pm
+lib/Authen/Passphrase/BlowfishCrypt.pm
 lib/Authen/Passphrase/Clear.pm
 lib/Authen/Passphrase/DESCrypt.pm
 lib/Authen/Passphrase/MD5Crypt.pm
@@ -13,9 +14,11 @@ lib/Authen/Passphrase/NTHash.pm
 lib/Authen/Passphrase/RejectAll.pm
 lib/Authen/Passphrase/SaltedDigest.pm
 t/acceptall.t
+t/blowfishcrypt.t
 t/clear.t
 t/extdescrypt.t
 t/gendescrypt.t
+t/intdescrypt.t
 t/md5crypt.t
 t/nthash.t
 t/rejectall.t

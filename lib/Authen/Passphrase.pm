@@ -84,9 +84,9 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
-use MIME::Base64 qw(decode_base64);
+use MIME::Base64 2.21 qw(decode_base64);
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 =head1 CONSTRUCTORS
 
@@ -96,6 +96,12 @@ our $VERSION = "0.000";
 
 Returns a passphrase recogniser object matching the supplied crypt
 encoding.
+
+The specific passphrase recogniser class is loaded at runtime, so
+successfully loading C<Authen::Passphrase> does not guarantee that
+it will be possible to use a specific type of passphrase recogniser.
+If necessary, check separately for presence and loadability of the
+recogniser class.
 
 In the formats below, "I<b>" represents a base 64 digit, "I<h>" represents
 a hexadecimal digit, and "I<d>" represents a decimal digit.  The following
@@ -115,17 +121,17 @@ L<Authen::Passphrase::DESCrypt>.
 
 =item "B<$1$>I<salt>B<$>I<bbbbbbbbbbbbbbbbbbbbbb>"
 
-A baroque passphrase scheme based on MD5, originating in BSD.
-See L<Authen::Passphrase::MD5Crypt>.
+A baroque passphrase scheme based on MD5, designed by
+Poul-Henning Kamp and originally implemented in FreeBSD.  See
+L<Authen::Passphrase::MD5Crypt>.
 
 =item "B<$2$>I<dd>B<$>I<bbb...(53)...bbb>"
 
 =item "B<$2a$>I<dd>B<$>I<bbb...(53)...bbb>"
 
-Two versions of a passphrase scheme based on Blowfish, originating
-in BSD.  Unimplemented at the time of writing, but if the
-C<Authen::Passphrase::BlowfishCrypt> module exists at runtime then you
-might be in luck.
+Two versions of a passphrase scheme based on Blowfish,
+designed by Niels Provos and David Mazieres for OpenBSD.  See
+L<Authen::Passphrase::BlowfishCrypt>.
 
 =item "B<$3$$>I<hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh>"
 
@@ -170,15 +176,12 @@ sub from_crypt($$) {
 		require Authen::Passphrase::MD5Crypt;
 		return Authen::Passphrase::MD5Crypt
 				->new(salt => $1, hash_base64 => $2);
-	} elsif($passwd =~ m#\A\$2(a)?\$([0-9]{2})\$
-				([./A-Za-z0-9]{21}[.Oeu])
-				([./A-Za-z0-9]{30}[.CGKOSWaeimquy26])\z#x) {
+	} elsif($passwd =~ m#\A\$2(a?)\$([0-9]{2})\$
+				([./A-Za-z0-9]{22})([./A-Za-z0-9]{31})\z#x) {
 		require Authen::Passphrase::BlowfishCrypt;
 		return Authen::Passphrase::BlowfishCrypt->new(
-				key_nul => defined($1),
-				keying_nrounds_log2 => $2,
-				salt_base64 => $3,
-				hash_base64 => $4);
+				key_nul => $1, cost => $2,
+				salt_base64 => $3, hash_base64 => $4);
 	} elsif($passwd =~ m#\A\$3\$\$([0-9a-f]{32})\z#) {
 		require Authen::Passphrase::NTHash;
 		return Authen::Passphrase::NTHash->new(hash_hex => $1);
@@ -190,7 +193,12 @@ sub from_crypt($$) {
 =item Authen::Passphrase->from_rfc2307(USERPASSWORD)
 
 Returns a passphrase recogniser object matching the supplied RFC 2307
-encoding.  Known schemes:
+encoding.
+
+The specific passphrase recogniser class is loaded at runtime.  See the
+note about this for the C<from_crypt> constructor above.
+
+Known schemes:
 
 =over
 

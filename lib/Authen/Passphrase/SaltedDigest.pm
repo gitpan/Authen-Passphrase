@@ -50,10 +50,10 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
-use Digest;
-use MIME::Base64 qw(encode_base64);
+use Digest 1.00;
+use MIME::Base64 2.21 qw(encode_base64);
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);

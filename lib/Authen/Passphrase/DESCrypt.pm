@@ -118,7 +118,7 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 	base64_to_int12 int12_to_base64
 );
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);

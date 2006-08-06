@@ -39,9 +39,9 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
-use Digest::MD4 qw(md4);
+use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);

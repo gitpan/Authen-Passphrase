@@ -1,3 +1,30 @@
+version 0.001; 2006-08-06
+
+  * implement Blowfish-based crypt() scheme in
+    Authen::Passphrase::BlowfishCrypt, based on the new
+    Crypt::Eksblowfish::Bcrypt module
+
+  * include MIME::Base64 in dependency list in Makefile.PL
+
+  * versioned dependencies
+
+  * add test t/intdescrypt.t for the full DESCrypt interface
+
+  * test full SaltedDigest interface in t/smd5.t and t/ssha.t
+
+  * test full NTHash interface in t/nthash.t
+
+  * use "=> 0" instead of "=> undef" in unversioned dependencies in
+    Makefile.PL
+
+  * in the Authen::Passphrase constructors, note the effects of the
+    runtime loading of specific recogniser class modules
+
+  * comment on the origins of the MD5-based and Blowfish-based crypt()
+    schemes
+
+  * corrected copyright year in README
+
 version 0.000; 2006-05-23
 
   * initial released version

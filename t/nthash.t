@@ -1,19 +1,24 @@
-use Test::More tests => 51;
+use Test::More tests => 56;
 
 BEGIN { use_ok "Authen::Passphrase::NTHash"; }
 
 my %pprs;
+my $i = 0;
 while(<DATA>) {
 	chomp;
 	s/(\S+) *//;
-	my $hash = $1;
-	my $ppr = Authen::Passphrase::NTHash->new(hash_hex => $hash);
+	my $hash_hex = $1;
+	my $hash = pack("H*", $hash_hex);
+	my $ppr = ($i++ & 1) ?
+			Authen::Passphrase::NTHash->new(hash => $hash) :
+			Authen::Passphrase::NTHash->new(hash_hex => $hash_hex);
 	ok $ppr;
-	is $ppr->hash_hex, $hash;
+	is $ppr->hash_hex, $hash_hex;
+	is $ppr->hash, $hash;
 	eval { $ppr->passphrase };
 	isnt $@, "";
-	is $ppr->as_crypt, "\$3\$\$".$hash;
-	is $ppr->as_rfc2307, "{CRYPT}\$3\$\$".$hash;
+	is $ppr->as_crypt, "\$3\$\$".$hash_hex;
+	is $ppr->as_rfc2307, "{CRYPT}\$3\$\$".$hash_hex;
 	$pprs{$_} = $ppr;
 }
 

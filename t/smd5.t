@@ -1,4 +1,6 @@
-use Test::More tests => 46;
+use Test::More tests => 66;
+
+use MIME::Base64 2.21 qw(encode_base64);
 
 BEGIN { use_ok "Authen::Passphrase::SaltedDigest"; }
 
@@ -7,18 +9,28 @@ eval { Digest->new("MD5"); };
 skip "no MD5 facility", 45 unless $@ eq "";
 
 my %pprs;
+my $i = 0;
 while(<DATA>) {
 	chomp;
 	s/(\S+) (\S+) *//;
-	my($salt, $hash) = ($1, $2);
+	my($salt_hex, $hash_hex) = ($1, $2);
+	my $salt = pack("H*", $salt_hex);
+	my $hash = pack("H*", $hash_hex);
 	my $ppr = Authen::Passphrase::SaltedDigest
 			->new(algorithm => "MD5",
-			      salt_hex => $salt, hash_hex => $hash);
+			      ($i & 1) ? (salt => $salt) :
+					 (salt_hex => $salt_hex),
+			      ($i & 2) ? (hash => $hash) :
+					 (hash_hex => $hash_hex));
+	$i++;
 	ok $ppr;
-	is $ppr->salt_hex, $salt;
-	is $ppr->hash_hex, $hash;
-	eval { $ppr->passphrase };
-	isnt $@, "";
+	is $ppr->salt_hex, $salt_hex;
+	is $ppr->salt, $salt;
+	is $ppr->hash_hex, $hash_hex;
+	is $ppr->hash, $hash;
+	eval { $ppr->passphrase }; isnt $@, "";
+	eval { $ppr->as_crypt }; isnt $@, "";
+	is $ppr->as_rfc2307, "{SMD5}".encode_base64($hash.$salt, "");
 	$pprs{$_} = $ppr;
 }
 

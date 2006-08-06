@@ -27,11 +27,11 @@ C<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The crypt() function in a modern Unix actually supports several
-different passphrase schemes.  This class is concerned only with
-one particular scheme, an MD5-based algorithm that originated in BSD.
-To handle the whole range of passphrase schemes supported by the modern
-crypt(), see the C<from_crypt> constructor and the C<as_crypt> method
-in L<Authen::Passphrase>.
+different passphrase schemes.  This class is concerned only with one
+particular scheme, an MD5-based algorithm designed by Poul-Henning Kamp
+and originally implemented in FreeBSD.  To handle the whole range of
+passphrase schemes supported by the modern crypt(), see the C<from_crypt>
+constructor and the C<as_crypt> method in L<Authen::Passphrase>.
 
 The MD5-based crypt() scheme uses the whole passphrase, a salt which
 can in principle be an arbitrary byte string, and the MD5 message
@@ -67,7 +67,7 @@ use strict;
 use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);
