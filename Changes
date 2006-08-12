@@ -1,7 +1,78 @@
+version 0.002; 2006-08-12
+
+  * implement LAN Manager hash scheme (RFC 2307 identifiers {LANMAN}
+    and {LANM}) in Authen::Passphrase::LANManager, along with separable
+    halves (crypt identifier $LM$) in Authen::Passphrase::LANManagerHalf
+
+  * implement Netscape Mail Server's MD5-based scheme (RFC 2307 identifier
+    {NS-MTA-MD5}) in Authen::Passphrase::NetscapeMail
+
+  * implement crypt16 from Ultrix in Authen::Passphrase::Crypt16
+
+  * implement bigcrypt from Digital Unix in Authen::Passphrase::BigCrypt
+
+  * implement RFC 2307 scheme identifier {MD4} (plain MD4)
+
+  * implement RFC 2307 scheme identifier {RMD160} (plain RIPEMD-160)
+
+  * implement RFC 2307 scheme identifier {MSNT} (NT-Hash)
+
+  * implement crypt scheme identifier $NT$ (NT-Hash with a different
+    textual format from $3$)
+
+  * implement RFC 2307 scheme identifier {WM-CRY} (synonym for {CRYPT})
+
+  * add a "passphrase =>" constructor parameter to
+    A::P::BlowfishCrypt->new, A::P::DESCrypt->new, A::P::MD5Crypt->new,
+    A::P::NTHash->new, and A::P::SaltedDigest->new (such a parameter
+    also exists in the new A::P::BigCrypt->new, A::P::Crypt16->new,
+    A::P::LANManager->new, A::P::LANManagerHalf->new, and
+    A::P::NetscapeMail->new)
+
+  * add a "salt_random =>" constructor parameter to
+    A::P::BlowfishCrypt->new, A::P::DESCrypt->new, A::P::MD5Crypt->new,
+    and A::P::SaltedDigest->new (such a parameter also exists in the new
+    A::P::BigCrypt->new, A::P::Crypt16->new and A::P::NetscapeMail->new)
+
+  * in A::P::SaltedDigest, accept bare package names and related forms,
+    and references to blessed objects, as algorithm identifiers
+
+  * in the from_crypt and from_rfc2307 constructors, reject strings
+    containing spaces or control characters
+
+  * in Authen::Passphrase::MD5Crypt, refuse to put a space character
+    into a crypt string
+
+  * in Authen::Passphrase::Clear, refuse to put spaces or control
+    characters into an RFC 2307 string
+
+  * in Authen::Passphrase::MD5Crypt, check that the salt string contains
+    only bytes
+
+  * prohibit the base class from_crypt and from_rfc2307 constructors
+    being called on subclasses
+
+  * in testing Authen::Passphrase::NTHash, check case handling
+
+  * rewrite the from_crypt constructor to use scheme identifiers as such,
+    the way from_rfc2307 already does
+
+  * in documentation for the from_crypt constructor, list all known
+    scheme identifiers
+
+  * in documentation for the from_rfc2307 constructor, list known
+    pseudo-schemes (where instead of a passphrase hash there is a
+    reference to some other authentication mechanism)
+
+  * discuss resistance to brute force attacks in documentation
+
+  * more realistic example salts in the synopsis of A::P::MD5Crypt and
+    A::P::SaltedDigest
+
 version 0.001; 2006-08-06
 
-  * implement Blowfish-based crypt() scheme in
-    Authen::Passphrase::BlowfishCrypt, based on the new
+  * implement Blowfish-based crypt() scheme (crypt identifiers $2$
+    and $2a$) in Authen::Passphrase::BlowfishCrypt, based on the new
     Crypt::Eksblowfish::Bcrypt module
 
   * include MIME::Base64 in dependency list in Makefile.PL

@@ -6,7 +6,7 @@ BEGIN { use_ok "Authen::Passphrase::SaltedDigest"; }
 
 SKIP: {
 eval { Digest->new("SHA-1"); };
-skip "no SHA-1 facility", 45 unless $@ eq "";
+skip "no SHA-1 facility", 65 unless $@ eq "";
 
 my %pprs;
 my $i = 0;

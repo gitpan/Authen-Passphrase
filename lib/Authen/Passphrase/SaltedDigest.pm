@@ -8,9 +8,15 @@ digest algorithm
 	use Authen::Passphrase::SaltedDigest;
 
 	$ppr = Authen::Passphrase::SaltedDigest->new(
-		algorithm => "SHA-1", salt => "my",
-		hash_hex => "301ce40d1b5ceb0919c9".
-			    "f26e1d7aff880a886f7b");
+		algorithm => "SHA-1",
+		salt_hex => "a9f524b1e819e96d8cc7".
+			    "a04d5471e8b10c84e596",
+		hash_hex => "8270d9d1a345d3806ab2".
+			    "3b0385702e10f1acc943");
+
+	$ppr = Authen::Passphrase::SaltedDigest->new(
+		algorithm => "SHA-1", salt_random => 20,
+		passphrase => "passphrase");
 
 	$algorithm = $ppr->algorithm;
 	$salt = $ppr->salt;
@@ -34,13 +40,24 @@ and the combined string is passed through a specified message digest
 algorithm.  The output of the message digest algorithm is the passphrase
 hash.
 
-The use of this passphrase scheme is recommended for new systems.
 The strength depends entirely on the choice of digest algorithm, so
 choose according to the level of security required.  SHA-1 is suitable for
 most applications, but recent work has revealed weaknesses in the basic
 structure of MD5, SHA-1, SHA-256, and all similar digest algorithms.
 A new generation of digest algorithms will probably emerge sometime
 around 2008.
+
+Digest algorithms are generally designed to be as efficient to compute
+as possible for their level of cryptographic strength.  An unbroken
+digest algorithm makes brute force the most efficient way to attack it,
+but makes no effort to resist a brute force attack.  This is a concern
+in some passphrase-using applications.
+
+The use of this kind of passphrase scheme is generally recommended for
+new systems.  Choice of digest algorithm is important: SHA-1 is suitable
+for most applications.  If efficiency of brute force attack is a concern,
+see L<Authen::Passphrase::BlowfishCrypt> for an algorithm designed to
+be expensive to compute.
 
 =cut
 
@@ -50,10 +67,13 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
+use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest 1.00;
 use MIME::Base64 2.21 qw(encode_base64);
+use Module::Runtime 0.001 qw(is_valid_module_name use_module);
+use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);
@@ -71,8 +91,28 @@ digest algorithm.  The following attributes may be given:
 
 =item B<algorithm>
 
-A string identifying the message digest algorithm to use.  It must be
-understood by C<< Digest->new >>.
+Specifies the algorithm to use.  If it is a reference to a blessed object,
+it must be possible to call the C<new> method on that object to generate
+a digest context object.
+
+If it is a string containing the subsequence "::" then it specifies
+a module to use.  A plain package name in bareword syntax, optionally
+preceded by "::" (so that top-level packages can be recognised as such),
+is taken as a class name, on which the C<new> method will be called to
+generate a digest context object.  The package name may optionally be
+followed by "-" to cause automatic loading of the module, and the "-"
+(if present) may optionally be followed by a version number that will
+be checked against.  For example, "Digest::MD5-1.99_53" would load the
+C<Digest::MD5> module and check that it is at least version 1.99_53
+(which is the first version that can be used by this module).
+
+A string not containing "::" and which is understood by C<< Digest->new >>
+will be passed to that function to generate a digest context object.
+
+Any other type of algorithm specifier has undefined behaviour.
+
+The digest context objects must support at least the standard C<add>
+and C<digest> methods.
 
 =item B<salt>
 
@@ -84,6 +124,14 @@ yielding an unsalted scheme.
 The salt, as a string of hexadecimal digits.  Defaults to the empty
 string, yielding an unsalted scheme.
 
+=item B<salt_random>
+
+Causes salt to be generated randomly.  The value given for this
+attribute must be a non-negative integer, giving the number of bytes
+of salt to generate.  (The same length as the hash is recommended.)
+The source of randomness may be controlled by the facility described
+in L<Data::Entropy>.
+
 =item B<hash>
 
 The hash, as a string of bytes.
@@ -92,15 +140,20 @@ The hash, as a string of bytes.
 
 The hash, as a string of hexadecimal digits.
 
+=item B<passphrase>
+
+A passphrase that will be accepted.
+
 =back
 
-The digest algorithm and hash must both be given.
+The digest algorithm must be given, and either the hash or the passphrase.
 
 =cut
 
 sub new($@) {
 	my $class = shift;
-	my Authen::Passphrase::SaltedDigest $self = fields::new($class);
+	my __PACKAGE__ $self = fields::new($class);
+	my $passphrase;
 	while(@_) {
 		my $attr = shift;
 		my $value = shift;
@@ -120,28 +173,46 @@ sub new($@) {
 			$value =~ m#\A(?:[0-9A-Fa-f]{2})+\z#
 				or croak "\"$value\" is not a valid salt";
 			$self->{salt} = pack("H*", $value);
+		} elsif($attr eq "salt_random") {
+			croak "salt specified redundantly"
+				if exists $self->{salt};
+			croak "\"$value\" is not a valid salt length"
+				unless $value == int($value) && $value >= 0;
+			$self->{salt} = rand_bits($value * 8);
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]*\z#
 				or croak "\"$value\" is not a valid hash";
 			$self->{hash} = $value;
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A(?:[0-9A-Fa-f]{2})+\z#
 				or croak "\"$value\" is not a valid hash";
 			$self->{hash} = pack("H*", $value);
+		} elsif($attr eq "passphrase") {
+			croak "passphrase specified redundantly"
+				if exists($self->{hash}) ||
+					defined($passphrase);
+			$passphrase = $value;
 		} else {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
 	croak "algorithm not specified" unless exists $self->{algorithm};
-	croak "hash not specified" unless exists $self->{hash};
 	$self->{salt} = "" unless exists $self->{salt};
-	my $th = Digest->new($self->{algorithm})->digest;
-	croak "not a valid ".$self->{algorithm}." hash"
-		unless length($th) == length($self->{hash});
+	if(defined $passphrase) {
+		$self->{hash} = $self->_hash_of($passphrase);
+	} elsif(exists $self->{hash}) {
+		croak "not a valid ".$self->{algorithm}." hash"
+			unless length($self->{hash}) ==
+				length($self->_hash_of(""));
+	} else {
+		croak "hash not specified";
+	}
 	return $self;
 }
 
@@ -153,8 +224,8 @@ sub new($@) {
 
 =item $ppr->algorithm
 
-Returns the digest algorithm, as a string that can be passed to C<<
-Digest->new >>.
+Returns the digest algorithm, in the same form as supplied to the
+constructor.
 
 =cut
 
@@ -217,26 +288,80 @@ can be represented in RFC 2307 form.
 
 =cut
 
-sub match($$) {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+sub _hash_of($$) {
+	my __PACKAGE__ $self = shift;
 	my($passphrase) = @_;
-	my $ctx = Digest->new($self->{algorithm});
+	my $alg = $self->{algorithm};
+	my $ctx;
+	if(is_string($alg)) {
+		if($alg =~ /::/) {
+			$alg =~ /\A(?:::)?([\w:]+)
+				   (-(\d[\d_]*(?:\._*\d[\d_]*)?)?)?\z/x
+				or croak "module spec `$alg' not understood";
+			my($pkgname, $load_p, $modver) = ($1, $2, $3);
+			croak "bad package name `$pkgname'"
+				unless is_valid_module_name($pkgname);
+			if($load_p) {
+				if(defined $modver) {
+					$modver =~ tr/_//d;
+					use_module($pkgname, $modver);
+				} else {
+					use_module($pkgname);
+				}
+			}
+			$ctx = $pkgname->new;
+		} else {
+			$ctx = Digest->new($alg);
+		}
+	} elsif(is_blessed($alg)) {
+		$ctx = $alg->new;
+	} else {
+		croak "algorithm specifier `$alg' is of an unrecognised type";
+	}
 	$ctx->add($passphrase);
 	$ctx->add($self->{salt});
-	return $ctx->digest eq $self->{hash};
+	return $ctx->digest;
 }
 
-my %rfc2307_scheme = (
+sub match($$) {
+	my __PACKAGE__ $self = shift;
+	my($passphrase) = @_;
+	return $self->_hash_of($passphrase) eq $self->{hash};
+}
+
+my %rfc2307_scheme_for_digest_name = (
+	"MD4" => "MD4",
 	"MD5" => "MD5",
 	"SHA-1" => "SHA",
 	"SHA1" => "SHA",
 );
 
+my %rfc2307_scheme_for_package_name = (
+	"Crypt::RIPEMD160" => "RMD160",
+	"Digest::MD4" => "MD4",
+	"Digest::MD5" => "MD5",
+	"Digest::MD5::Perl" => "MD5",
+	"Digest::Perl::MD4" => "MD4",
+	"Digest::SHA" => "SHA",
+	"Digest::SHA::PurePerl" => "SHA",
+	"Digest::SHA1" => "SHA",
+	"MD5" => "MD5",
+	"RIPEMD160" => "RMD160",
+);
+
 sub as_rfc2307($) {
 	my Authen::Passphrase::SaltedDigest $self = shift;
-	my $scheme = $rfc2307_scheme{$self->{algorithm}};
-	croak "don't know RFC 2307 scheme identifier for digest algorithm ".
-			$self->{algorithm}
+	my $alg = $self->{algorithm};
+	my $scheme;
+	if(is_string($alg)) {
+		if($alg =~ /::/) {
+			$scheme = $rfc2307_scheme_for_package_name{$1}
+				if $alg =~ /\A(?:::)?([\w:]+)(?:-[0-9._]*)?\z/;
+		} else {
+			$scheme = $rfc2307_scheme_for_digest_name{$alg};
+		}
+	}
+	croak "don't know RFC 2307 scheme identifier for digest algorithm $alg"
 		unless defined $scheme;
 	return "{".($self->{salt} eq "" ? "" : "S").$scheme."}".
 		encode_base64($self->{hash}.$self->{salt}, "");

@@ -8,8 +8,12 @@ crypt()
 	use Authen::Passphrase::MD5Crypt;
 
 	$ppr = Authen::Passphrase::MD5Crypt->new(
-			salt => "my",
-			hash_base64 => "rABM6TzyLaAnhuiWWgU81.");
+			salt => "Vd3f8aG6",
+			hash_base64 => "GcsdF4YCXb0PM2UmXjIoI1");
+
+	$ppr = Authen::Passphrase::MD5Crypt->new(
+			salt_random => 1,
+			passphrase => "passphrase");
 
 	$salt = $ppr->salt;
 	$hash_base64 = $ppr->hash_base64;
@@ -57,6 +61,12 @@ binary form.  The textual encoding described above, including the final
 permutation, is used universally, so this class does not support any
 binary format.
 
+The complex algorithm was designed to be slow to compute, in order
+to resist brute force attacks.  However, the complexity is fixed,
+and the operation of Moore's Law has rendered it far less expensive
+than intended.  If efficiency of a brute force attack is a concern,
+sse L<Authen::Passphrase::BlowfishCrypt>.
+
 =cut
 
 package Authen::Passphrase::MD5Crypt;
@@ -67,10 +77,11 @@ use strict;
 use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);
+use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
 =head1 CONSTRUCTOR
 
@@ -88,39 +99,69 @@ algorithm.  The following attributes may be given:
 The salt, as a raw string.  It may be any byte string, but in crypt()
 usage it is conventionally limited to zero to eight base 64 digits.
 
+=item B<salt_random>
+
+Causes salt to be generated randomly.  The value given for this
+attribute is ignored.  The salt will be a string of eight base 64 digits.
+The source of randomness may be controlled by the facility described
+in L<Data::Entropy>.
+
 =item B<hash_base64>
 
 The hash, as a string of 22 base 64 digits.  This is the final part of
 what crypt() outputs.
 
+=item B<passphrase>
+
+A passphrase that will be accepted.
+
 =back
 
-The salt and hash must both be given.
+The salt must be given, and either the hash or the passphrase.
 
 =cut
 
 sub new($@) {
 	my $class = shift;
-	my Authen::Passphrase::MD5Crypt $self = fields::new($class);
+	my __PACKAGE__ $self = fields::new($class);
+	my $passphrase;
 	while(@_) {
 		my $attr = shift;
 		my $value = shift;
 		if($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
+			$value =~ m#\A[\x{0}-\x{ff}]*\z#
+				or croak "not a valid salt";
 			$self->{salt} = $value;
+		} elsif($attr eq "salt_random") {
+			croak "salt specified redundantly"
+				if exists $self->{salt};
+			$self->{salt} = "";
+			for(my $i = 8; $i--; ) {
+				$self->{salt} .= chr(rand_int(64));
+			}
+			$self->{salt} =~ tr#\x00-\x3f#./0-9A-Za-z#;
 		} elsif($attr eq "hash_base64") {
 			croak "hash specified redundantly"
-				if exists $self->{hash_base64};
+				if exists($self->{hash_base64}) ||
+					defined($passphrase);
 			$value =~ m#\A[./0-9A-Za-z]{21}[./01]\z#
 				or croak "\"$value\" is not a valid ".
 						"MD5-based crypt() hash";
 			$self->{hash_base64} = $value;
+		} elsif($attr eq "passphrase") {
+			croak "passphrase specified redundantly"
+				if exists($self->{hash_base64}) ||
+					defined($passphrase);
+			$passphrase = $value;
 		} else {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
 	croak "salt not specified" unless exists $self->{salt};
+	$self->{hash_base64} = $self->_hash_base64_of($passphrase)
+		if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash_base64};
 	return $self;
 }
@@ -166,22 +207,28 @@ bytes, and it cannot contain any NUL or "B<$>" characters.
 
 =cut
 
-sub match($$) {
-	my Authen::Passphrase::MD5Crypt $self = shift;
+sub _hash_base64_of($$) {
+	my __PACKAGE__ $self = shift;
 	my($passphrase) = @_;
 	die "can't use a crypt-incompatible salt yet ".
 			"(need generalised Crypt::MD5Passwd)"
-		if $self->{salt} =~ /[^\ -\#\%-9\;-\~]/ ||
+		if $self->{salt} =~ /[^\!-\#\%-9\;-\~]/ ||
 			length($self->{salt}) > 8;
 	my $hash = unix_md5_crypt($passphrase, $self->{salt});
 	$hash =~ s/\A.*\$//;
-	return $hash eq $self->{hash_base64};
+	return $hash;
+}
+
+sub match($$) {
+	my __PACKAGE__ $self = shift;
+	my($passphrase) = @_;
+	return $self->_hash_base64_of($passphrase) eq $self->{hash_base64};
 }
 
 sub as_crypt($) {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	croak "can't put this salt into a crypt string"
-		if $self->{salt} =~ /[^\ -\#\%-9\;-\~]/ ||
+		if $self->{salt} =~ /[^\!-\#\%-9\;-\~]/ ||
 			length($self->{salt}) > 8;
 	return "\$1\$".$self->{salt}."\$".$self->{hash_base64};
 }

@@ -12,6 +12,10 @@ Unix crypt()
 		salt => "sodium__chloride",
 		hash_base64 => "BPZijhMHLvPeNMHd6XwZyNamOXVBTPi");
 
+	$ppr = Authen::Passphrase::BlowfishCrypt->new(
+		cost => 8, salt_random => 1,
+		passphrase => "passphrase");
+
 	$key_nul = $ppr->key_nul;
 	$cost = $ppr->cost;
 	$cost = $ppr->keying_nrounds_log2;
@@ -59,6 +63,12 @@ using a base 64 encoding.  The base 64 digits are "B<.>", "B</>",
 The 16-byte salt is represented as 22 base 64 digits, and the 23-byte
 hash as 31 base 64 digits.
 
+This algorithm is intended for situations where the efficiency of
+a brute force attack is a concern.  It is suitable for use in new
+applications where this requirement exists.  If that is not a concern,
+and it suffices to merely make brute force the most efficient attack, see
+L<Authen::Passphrase::SaltedDigest> for more efficient hash algorithms.
+
 =cut
 
 package Authen::Passphrase::BlowfishCrypt;
@@ -68,8 +78,9 @@ use strict;
 
 use Carp qw(croak);
 use Crypt::Eksblowfish::Bcrypt 0.000 qw(bcrypt_hash en_base64 de_base64);
+use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 use fields qw(key_nul cost salt hash);
@@ -108,6 +119,12 @@ The salt, as a 16-byte string.
 
 The salt, as a string of 22 base 64 digits.
 
+=item B<salt_random>
+
+Causes salt to be generated randomly.  The value given for this attribute
+is ignored.  The source of randomness may be controlled by the facility
+described in L<Data::Entropy>.
+
 =item B<hash>
 
 The hash, as a 23-byte string.
@@ -116,15 +133,20 @@ The hash, as a 23-byte string.
 
 The hash, as a string of 31 base 64 digits.
 
+=item B<passphrase>
+
+A passphrase that will be accepted.
+
 =back
 
-The cost, salt, and hash must all be given.
+The cost and salt must be given, and either the hash or the passphrase.
 
 =cut
 
 sub new($@) {
 	my $class = shift;
 	my __PACKAGE__ $self = fields::new($class);
+	my $passphrase;
 	while(@_) {
 		my $attr = shift;
 		my $value = shift;
@@ -150,26 +172,38 @@ sub new($@) {
 			croak "\"$value\" is not a valid salt"
 				unless length($value) == 22;
 			$self->{salt} = de_base64($value);
+		} elsif($attr eq "salt_random") {
+			croak "salt specified redundantly"
+				if exists $self->{salt};
+			$self->{salt} = rand_bits(128);
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{23}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = $value;
 		} elsif($attr eq "hash_base64") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			croak "\"$value\" is not a valid hash"
 				unless length($value) == 31;
 			$self->{hash} = de_base64($value);
+		} elsif($attr eq "passphrase") {
+			croak "passphrase specified redundantly"
+				if exists($self->{hash}) ||
+					defined($passphrase);
+			$passphrase = $value;
 		} else {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
+	$self->{key_nul} = 1 unless exists $self->{key_nul};
 	croak "cost not specified" unless exists $self->{cost};
 	croak "salt not specified" unless exists $self->{salt};
+	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash};
-	$self->{key_nul} = 1 unless exists $self->{key_nul};
 	return $self;
 }
 
@@ -265,14 +299,20 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub match($$) {
+sub _hash_of($$) {
 	my __PACKAGE__ $self = shift;
 	my($passphrase) = @_;
 	return bcrypt_hash({
-				key_nul => $self->{key_nul},
-				cost => $self->{cost},
-				salt => $self->{salt},
-			}, $passphrase) eq $self->{hash};
+		key_nul => $self->{key_nul},
+		cost => $self->{cost},
+		salt => $self->{salt},
+	}, $passphrase);
+}
+
+sub match($$) {
+	my __PACKAGE__ $self = shift;
+	my($passphrase) = @_;
+	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt($) {

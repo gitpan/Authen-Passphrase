@@ -9,6 +9,9 @@ Authen::Passphrase::NTHash - passphrases using the NT-Hash algorithm
 	$ppr = Authen::Passphrase::NTHash->new(
 		hash_hex => "7f8fe03093cc84b267b109625f6bbf4b");
 
+	$ppr = Authen::Passphrase::NTHash->new(
+		passphrase => "passphrase");
+
 	$hash = $ppr->hash;
 	$hash_hex = $ppr->hash_hex;
 
@@ -41,7 +44,7 @@ use strict;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -65,33 +68,48 @@ The hash, as a string of 16 bytes.
 
 The hash, as a string of 32 hexadecimal digits.
 
+=item B<passphrase>
+
+A passphrase that will be accepted.
+
 =back
+
+Either the hash or the passphrase must be given.
 
 =cut
 
 sub new($@) {
 	my $class = shift;
-	my Authen::Passphrase::NTHash $self = fields::new($class);
+	my __PACKAGE__ $self = fields::new($class);
+	my $passphrase;
 	while(@_) {
 		my $attr = shift;
 		my $value = shift;
 		if($attr eq "hash") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
 				or croak "not a valid MD4 hash";
 			$self->{hash} = $value;
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[0-9A-Fa-f]{32}\z#
 				or croak "\"$value\" is not a valid ".
 						"hex MD4 hash";
 			$self->{hash} = pack("H*", $value);
+		} elsif($attr eq "passphrase") {
+			croak "passphrase specified redundantly"
+				if exists($self->{hash}) ||
+					defined($passphrase);
+			$passphrase = $value;
 		} else {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
+	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
 }
@@ -134,17 +152,28 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub match($$) {
-	my Authen::Passphrase::NTHash $self = shift;
+sub _hash_of($$) {
+	my __PACKAGE__ $self = shift;
 	my($passphrase) = @_;
 	$passphrase = substr($passphrase, 0, 128);
 	$passphrase =~ s/(.)/pack("v", ord($1))/eg;
-	return md4($passphrase) eq $self->{hash};
+	return md4($passphrase);
+}
+
+sub match($$) {
+	my __PACKAGE__ $self = shift;
+	my($passphrase) = @_;
+	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt($) {
 	my Authen::Passphrase::NTHash $self = shift;
 	return "\$3\$\$".$self->hash_hex;
+}
+
+sub as_rfc2307($) {
+	my Authen::Passphrase::NTHash $self = shift;
+	return "{MSNT}".$self->hash_hex;
 }
 
 =back

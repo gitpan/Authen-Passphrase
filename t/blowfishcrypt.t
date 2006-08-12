@@ -1,4 +1,4 @@
-use Test::More tests => 82;
+use Test::More tests => 93;
 
 BEGIN { use_ok "Authen::Passphrase::BlowfishCrypt"; }
 
@@ -27,6 +27,26 @@ is $ppr->salt, "abcdefghijklmnop";
 is $ppr->salt_base64, "WUHhXETkX0fnYkrqZU3ta.";
 is $ppr->hash, "ABCDEFGHIJKLMNOPQRSTUVW";
 is $ppr->hash_base64, "OSHBPCTEPyfHQirKRS3NSDDQSzPTTja";
+
+$ppr = Authen::Passphrase::BlowfishCrypt
+		->new(cost => 8,
+		      salt_base64 => "WUHhXETkX0fnYkrqZU3ta.",
+		      passphrase => "wibble");
+ok $ppr;
+ok $ppr->key_nul;
+is $ppr->cost, 8;
+is $ppr->salt_base64, "WUHhXETkX0fnYkrqZU3ta.";
+is $ppr->hash_base64, "blPSuQlDs8xl6eM1xtMFFn1QKYeXCXO";
+
+$ppr = Authen::Passphrase::BlowfishCrypt
+		->new(cost => 8, salt_random => 1,
+		      passphrase => "wibble");
+ok $ppr;
+ok $ppr->key_nul;
+is $ppr->cost, 8;
+is length($ppr->salt), 16;
+is length($ppr->hash), 23;
+ok $ppr->match("wibble");
 
 my %pprs;
 while(<DATA>) {

@@ -12,6 +12,10 @@ crypt()
 			hash_base64 => "TYK.j.88/9s");
 
 	$ppr = Authen::Passphrase::DESCrypt->new(
+			salt_random => 12,
+			passphrase => "passphrase");
+
+	$ppr = Authen::Passphrase::DESCrypt->new(
 			fold => 1,
 			initial => "xyzzy!!!",
 			nrounds => 500,
@@ -117,8 +121,9 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 	base64_to_int24 int24_to_base64
 	base64_to_int12 int12_to_base64
 );
+use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);
@@ -168,6 +173,13 @@ The salt, as an integer in the range [0, 16777216).
 
 The salt, as a string of two or four base 64 digits.
 
+=item B<salt_random>
+
+Causes salt to be generated randomly.  The value given for this attribute
+must be either 12 or 24, giving the number of bits of salt to generate.
+The source of randomness may be controlled by the facility described
+in L<Data::Entropy>.
+
 =item B<hash>
 
 The hash (output of encryption), as a string of exactly eight bytes.
@@ -176,16 +188,21 @@ The hash (output of encryption), as a string of exactly eight bytes.
 
 The hash, as a string of eleven base 64 digits.
 
+=item B<passphrase>
+
+A passphrase that will be accepted.
+
 =back
 
-The salt and hash must both be given.  The other parameters default to
-those used in the original DES-based crypt().
+The salt must be given, and either the hash or the passphrase.  The other
+parameters default to those used in the original DES-based crypt().
 
 =cut
 
 sub new($@) {
 	my $class = shift;
 	my Authen::Passphrase::DESCrypt $self = fields::new($class);
+	my $passphrase;
 	while(@_) {
 		my $attr = shift;
 		my $value = shift;
@@ -233,28 +250,42 @@ sub new($@) {
 			$self->{salt} = length($value) == 2 ?
 				base64_to_int12($value) :
 				base64_to_int24($value);
+		} elsif($attr eq "salt_random") {
+			croak "salt specified redundantly"
+				if exists $self->{salt};
+			croak "\"$value\" is not a valid salt size"
+				unless $value == 12 || $value == 24;
+			$self->{salt} = rand_int(1 << $value);
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = $value;
 		} elsif($attr eq "hash_base64") {
 			croak "hash specified redundantly"
-				if exists $self->{hash};
+				if exists($self->{hash}) ||
+					defined($passphrase);
 			$value =~ m#\A[./0-9A-Za-z]{10}[.26AEIMQUYcgkosw]\z#
 				or croak "\"$value\" is not a valid ".
 					"encoded hash";
 			$self->{hash} = base64_to_block($value);
+		} elsif($attr eq "passphrase") {
+			croak "passphrase specified redundantly"
+				if exists($self->{hash}) ||
+					defined($passphrase);
+			$passphrase = $value;
 		} else {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
-	croak "salt not specified" unless exists $self->{salt};
-	croak "hash not specified" unless exists $self->{hash};
 	$self->{fold} = 0 unless exists $self->{fold};
 	$self->{initial} = "\0\0\0\0\0\0\0\0" unless exists $self->{initial};
 	$self->{nrounds} = 25 unless exists $self->{nrounds};
+	croak "salt not specified" unless exists $self->{salt};
+	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
+	croak "hash not specified" unless exists $self->{hash};
 	return $self;
 }
 
@@ -388,13 +419,20 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub match($$) {
-	my Authen::Passphrase::DESCrypt $self = shift;
+
+
+sub _hash_of($$) {
+	my __PACKAGE__ $self = shift;
 	my($passphrase) = @_;
 	$passphrase = fold_password($passphrase) if $self->{fold};
 	return crypt_rounds($passphrase, $self->{nrounds}, $self->{salt},
-			    $self->{initial}) eq
-		$self->{hash};
+			    $self->{initial});
+}
+
+sub match($$) {
+	my __PACKAGE__ $self = shift;
+	my($passphrase) = @_;
+	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt($) {

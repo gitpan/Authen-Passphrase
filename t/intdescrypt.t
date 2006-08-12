@@ -1,4 +1,4 @@
-use Test::More tests => 45;
+use Test::More tests => 58;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
 
@@ -63,3 +63,24 @@ is $ppr->salt_base64_2, "ab";
 is $ppr->salt_base64_4, "ab..";
 is $ppr->hash, "\x86\x8d\xe9\xf0\x5e\x4f\x8a\x82";
 is $ppr->hash_base64, "Vcrdw3tDWc6";
+
+$ppr = Authen::Passphrase::DESCrypt
+		->new(salt => 2534,
+		      passphrase => "wibble");
+ok $ppr;
+ok !$ppr->fold;
+is $ppr->initial_base64, "...........";
+is $ppr->nrounds_base64_4, "N...";
+is $ppr->salt_base64_4, "ab..";
+is $ppr->hash_base64, "Fj33Wj0Z5j.";
+
+$ppr = Authen::Passphrase::DESCrypt
+		->new(salt_random => 12,
+		      passphrase => "wibble");
+ok $ppr;
+ok !$ppr->fold;
+is $ppr->initial_base64, "...........";
+is $ppr->nrounds_base64_4, "N...";
+like $ppr->salt_base64_4, qr/\A..\.\.\z/;
+is length($ppr->hash), 8;
+ok $ppr->match("wibble");

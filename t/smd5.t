@@ -1,4 +1,4 @@
-use Test::More tests => 66;
+use Test::More tests => 77;
 
 use MIME::Base64 2.21 qw(encode_base64);
 
@@ -6,7 +6,27 @@ BEGIN { use_ok "Authen::Passphrase::SaltedDigest"; }
 
 SKIP: {
 eval { Digest->new("MD5"); };
-skip "no MD5 facility", 45 unless $@ eq "";
+skip "no MD5 facility", 70 unless $@ eq "";
+
+my $ppr = Authen::Passphrase::SaltedDigest
+		->new(algorithm => "Digest::MD5-1.99_53", salt => "NaCl",
+		      passphrase => "wibble");
+ok $ppr;
+is $ppr->salt, "NaCl";
+is $ppr->salt_hex, "4e61436c";
+is $ppr->hash, "\x04\xbd\x9d\x36\xc5\xc5\x49\x79".
+		"\x84\xa2\x67\x0e\xd2\x44\x2f\x9d";
+is $ppr->hash_hex, "04bd9d36c5c5497984a2670ed2442f9d";
+like $ppr->as_rfc2307, qr/\A\{SMD5\}/;
+
+$ppr = Authen::Passphrase::SaltedDigest
+		->new(algorithm => "MD5", salt_random => 13,
+		      passphrase => "wibble");
+ok $ppr;
+is length($ppr->salt), 13;
+is length($ppr->hash), 16;
+like $ppr->as_rfc2307, qr/\A\{SMD5\}/;
+ok $ppr->match("wibble");
 
 my %pprs;
 my $i = 0;
@@ -16,7 +36,7 @@ while(<DATA>) {
 	my($salt_hex, $hash_hex) = ($1, $2);
 	my $salt = pack("H*", $salt_hex);
 	my $hash = pack("H*", $hash_hex);
-	my $ppr = Authen::Passphrase::SaltedDigest
+	$ppr = Authen::Passphrase::SaltedDigest
 			->new(algorithm => "MD5",
 			      ($i & 1) ? (salt => $salt) :
 					 (salt_hex => $salt_hex),

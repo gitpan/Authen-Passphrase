@@ -33,7 +33,9 @@ package Authen::Passphrase::Clear;
 use warnings;
 use strict;
 
-our $VERSION = "0.001";
+use Carp qw(croak);
+
+our $VERSION = "0.002";
 
 use base qw(Authen::Passphrase);
 
@@ -79,7 +81,12 @@ sub match($$) {
 
 sub passphrase($) { ${$_[0]} }
 
-sub as_rfc2307($) { "{CLEARTEXT}".${$_[0]} }
+sub as_rfc2307($) {
+	my($self) = @_;
+	croak "can't put this passphrase into an RFC 2307 string"
+		if $$self =~ /[^!-~]/;
+	return "{CLEARTEXT}".$$self;
+}
 
 =back
 
