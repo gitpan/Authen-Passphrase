@@ -15,6 +15,12 @@ crypt()
 			salt_random => 1,
 			passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::MD5Crypt->from_crypt(
+		'$1$Vd3f8aG6$GcsdF4YCXb0PM2UmXjIoI1');
+
+	$ppr = Authen::Passphrase::MD5Crypt->from_rfc2307(
+		'{CRYPT}$1$Vd3f8aG6$GcsdF4YCXb0PM2UmXjIoI1');
+
 	$salt = $ppr->salt;
 	$hash_base64 = $ppr->hash_base64;
 
@@ -74,16 +80,17 @@ package Authen::Passphrase::MD5Crypt;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
+use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);
-use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -133,7 +140,7 @@ sub new($@) {
 				if exists $self->{salt};
 			$value =~ m#\A[\x{0}-\x{ff}]*\z#
 				or croak "not a valid salt";
-			$self->{salt} = $value;
+			$self->{salt} = "$value";
 		} elsif($attr eq "salt_random") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -149,7 +156,7 @@ sub new($@) {
 			$value =~ m#\A[./0-9A-Za-z]{21}[./01]\z#
 				or croak "\"$value\" is not a valid ".
 						"MD5-based crypt() hash";
-			$self->{hash_base64} = $value;
+			$self->{hash_base64} = "$value";
 		} elsif($attr eq "passphrase") {
 			croak "passphrase specified redundantly"
 				if exists($self->{hash_base64}) ||
@@ -165,6 +172,32 @@ sub new($@) {
 	croak "hash not specified" unless exists $self->{hash_base64};
 	return $self;
 }
+
+=item Authen::Passphrase::MD5Crypt->from_crypt(PASSWD)
+
+Generates a new passphrase recogniser object using the MD5-based crypt()
+algorithm, from a crypt string.  The crypt string must consist of
+"B<$1$>", the salt, "B<$>", then 22 base 64 digits giving the hash.
+The salt may be up to 8 characters long, and cannot contain "B<$>"
+or any character that cannot appear in a crypt string.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A\$1\$/) {
+		$passwd =~ m:\A\$1\$([!-#%-9;-~]{0,8})\$([./0-9A-Za-z]{22})\z:
+			or croak "malformed \$1\$ data";
+		return $class->new(salt => $1, hash_base64 => $2);
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::MD5Crypt->from_rfc2307(USERPASSWORD)
+
+Generates a new passphrase recogniser object using the MD5-based
+crypt() algorithm, from an RFC 2307 string.  The string must consist of
+"B<{CRYPT}>" (case insensitive) followed by an acceptable crypt string.
 
 =back
 

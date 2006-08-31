@@ -15,6 +15,10 @@ Server's method
 		salt_random => 1,
 		passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::NetscapeMail->from_rfc2307(
+		"{NS-MTA-MD5}8fd9d0a03491ce8f99cfbc9ab39f0dd5".
+		"983757d7b519e86d9b5d472aca4eea3a");
+
 	$salt = $ppr->salt;
 	$hash = $ppr->hash;
 	$hash_hex = $ppr->hash_hex;
@@ -45,16 +49,17 @@ package Authen::Passphrase::NetscapeMail;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -107,7 +112,7 @@ sub new($@) {
 				if exists $self->{salt};
 			$value =~ m#\A[\x{0}-\x{ff}]{32}\z#
 				or croak "not a valid salt";
-			$self->{salt} = $value;
+			$self->{salt} = "$value";
 		} elsif($attr eq "salt_random") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -118,7 +123,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
 				or croak "not a valid MD5 hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -140,6 +145,26 @@ sub new($@) {
 	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
+}
+
+=item Authen::Passphrase::NetscapeMail->from_rfc2307(USERPASSWORD)
+
+Generates a new Netscape Mail Server passphrase recogniser object from
+an RFC 2307 string.  The string must consist of "B<{NS-MTA-MD5}>" (case
+insensitive) followed by the hash in case-insensitive hexadecimal and
+then the salt.  The salt must be exactly 32 characters long, and cannot
+contain any character that cannot appear in an RFC 2307 string.
+
+=cut
+
+sub from_rfc2307($$) {
+	my($class, $userpassword) = @_;
+	if($userpassword =~ /\A\{(?i:ns-mta-md5)\}/) {
+		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})([!-~]{32})\z/
+			or croak "malformed {NS-MTA-MD5} data";
+		return $class->new(salt => $2, hash_hex => $1);
+	}
+	return $class->SUPER::from_rfc2307($userpassword);
 }
 
 =back

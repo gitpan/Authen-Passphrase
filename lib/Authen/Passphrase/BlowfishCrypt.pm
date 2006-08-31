@@ -16,6 +16,14 @@ Unix crypt()
 		cost => 8, salt_random => 1,
 		passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::BlowfishCrypt->from_crypt(
+		'$2a$08$a07iYVTrVz7hYEvtakjiXOB'.
+		'PZijhMHLvPeNMHd6XwZyNamOXVBTPi');
+
+	$ppr = Authen::Passphrase::BlowfishCrypt->from_rfc2307(
+		'{CRYPT}$2a$08$a07iYVTrVz7hYEvtakjiXOB'.
+		'PZijhMHLvPeNMHd6XwZyNamOXVBTPi');
+
 	$key_nul = $ppr->key_nul;
 	$cost = $ppr->cost;
 	$cost = $ppr->keying_nrounds_log2;
@@ -76,23 +84,24 @@ package Authen::Passphrase::BlowfishCrypt;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::Eksblowfish::Bcrypt 0.000 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(key_nul cost salt hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
 =item Authen::Passphrase::BlowfishCrypt->new(ATTR => VALUE, ...)
 
-Generates a new passphrase recogniser object using the generalised
-DES-based crypt() algorithm.  The following attributes may be given:
+Generates a new passphrase recogniser object using the Blowfish-based
+crypt() algorithm.  The following attributes may be given:
 
 =over
 
@@ -159,13 +168,13 @@ sub new($@) {
 				if exists $self->{cost};
 			croak "\"$value\" is not a valid cost parameter"
 				unless $value == int($value) && $value >= 0;
-			$self->{cost} = $value;
+			$self->{cost} = 0+$value;
 		} elsif($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
 			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
 				or croak "\"$value\" is not a valid raw salt";
-			$self->{salt} = $value;
+			$self->{salt} = "$value";
 		} elsif($attr eq "salt_base64") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -182,7 +191,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{23}\z#
 				or croak "not a valid raw hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_base64") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -199,13 +208,42 @@ sub new($@) {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
-	$self->{key_nul} = 1 unless exists $self->{key_nul};
+	$self->{key_nul} = !!1 unless exists $self->{key_nul};
 	croak "cost not specified" unless exists $self->{cost};
 	croak "salt not specified" unless exists $self->{salt};
 	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
 }
+
+=item Authen::Passphrase::BlowfishCrypt->from_crypt(PASSWD)
+
+Generates a new passphrase recogniser object using the Blowfish-based
+crypt() algorithm, from a crypt string.  The crypt string must start with
+"B<$2$>" for the version that does not append NUL to the key, or "B<$2a$>"
+for the version that does.  The next two characters must be decimal digits
+giving the cost parameter.  This must be followed by "B<$>", 22 base 64
+digits giving the salt, and finally 31 base 64 digits giving the hash.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A(\$2a?\$)/) {
+		$passwd =~ m#\A\$2(a?)\$([0-9]{2})\$
+				([./A-Za-z0-9]{22})([./A-Za-z0-9]{31})\z#x
+			or croak "malformed $1 data";
+		return $class->new(key_nul => $1, cost => $2,
+				   salt_base64 => $3, hash_base64 => $4);
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::BlowfishCrypt->from_rfc2307(USERPASSWORD)
+
+Generates a new passphrase recogniser object using the Blowfish-based
+crypt() algorithm, from an RFC 2307 string.  The string must consist of
+"B<{CRYPT}>" (case insensitive) followed by an acceptable crypt string.
 
 =back
 

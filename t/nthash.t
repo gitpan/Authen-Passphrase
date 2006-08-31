@@ -1,4 +1,4 @@
-use Test::More tests => 59;
+use Test::More tests => 67;
 
 BEGIN { use_ok "Authen::Passphrase::NTHash"; }
 
@@ -7,6 +7,26 @@ ok $ppr;
 is $ppr->hash, "\x53\xf0\xfa\xe7\xd5\x3b\xbe\x6c".
 		"\x90\xf8\x43\xec\xeb\x71\xdc\xa0";
 is $ppr->hash_hex, "53f0fae7d53bbe6c90f843eceb71dca0";
+
+$ppr = Authen::Passphrase::NTHash
+	->from_crypt('$3$$008152e575f1b34babf315cc4971c15d');
+ok $ppr;
+is $ppr->hash_hex, "008152e575f1b34babf315cc4971c15d";
+
+$ppr = Authen::Passphrase::NTHash
+	->from_crypt('$NT$008152e575f1b34babf315cc4971c15d');
+ok $ppr;
+is $ppr->hash_hex, "008152e575f1b34babf315cc4971c15d";
+
+$ppr = Authen::Passphrase::NTHash
+	->from_rfc2307('{CrYpT}$3$$008152e575f1b34babf315cc4971c15d');
+ok $ppr;
+is $ppr->hash_hex, "008152e575f1b34babf315cc4971c15d";
+
+$ppr = Authen::Passphrase::NTHash
+	->from_rfc2307('{MsNt}008152e575f1b34BABf315cc4971c15d');
+ok $ppr;
+is $ppr->hash_hex, "008152e575f1b34babf315cc4971c15d";
 
 my %pprs;
 my $i = 0;

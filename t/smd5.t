@@ -1,14 +1,17 @@
-use Test::More tests => 77;
+use Test::More tests => 81;
 
 use MIME::Base64 2.21 qw(encode_base64);
 
 BEGIN { use_ok "Authen::Passphrase::SaltedDigest"; }
 
-SKIP: {
-eval { Digest->new("MD5"); };
-skip "no MD5 facility", 70 unless $@ eq "";
-
 my $ppr = Authen::Passphrase::SaltedDigest
+		->from_rfc2307("{SMD5}1NdYklP8pSDsgowfOxOK7/x4sUA=");
+ok $ppr;
+is $ppr->algorithm, "MD5";
+is $ppr->salt_hex, "fc78b140";
+is $ppr->hash_hex, "d4d7589253fca520ec828c1f3b138aef";
+
+$ppr = Authen::Passphrase::SaltedDigest
 		->new(algorithm => "Digest::MD5-1.99_53", salt => "NaCl",
 		      passphrase => "wibble");
 ok $ppr;
@@ -59,8 +62,6 @@ foreach my $rightphrase (sort keys %pprs) {
 	foreach my $passphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
-}
-
 }
 
 __DATA__

@@ -1,4 +1,4 @@
-use Test::More tests => 64;
+use Test::More tests => 67;
 
 BEGIN { use_ok "Authen::Passphrase::NetscapeMail"; }
 
@@ -18,6 +18,13 @@ ok $ppr;
 like $ppr->salt, qr/\A[0-9a-f]{32}\z/;
 is length($ppr->hash), 16;
 ok $ppr->match("wibble");
+
+$ppr = Authen::Passphrase::NetscapeMail->from_rfc2307(
+	"{NS-MTA-MD5}f553c0b7d40a9f815638FCAC319e30c2".
+	"45f6204ab8e103b3dc38a93fbf4d1ad1");
+ok $ppr;
+is $ppr->salt, "45f6204ab8e103b3dc38a93fbf4d1ad1";
+is $ppr->hash_hex, "f553c0b7d40a9f815638fcac319e30c2";
 
 my %pprs;
 my $i = 0;

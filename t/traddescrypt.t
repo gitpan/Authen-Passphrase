@@ -1,15 +1,26 @@
-use Test::More tests => 56;
+use Test::More tests => 77;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
+
+my $ppr = Authen::Passphrase::DESCrypt->from_crypt("UBJcPos7octOA");
+ok $ppr;
+ok !$ppr->fold;
+is $ppr->initial_base64, "...........";
+is $ppr->nrounds, 25;
+is $ppr->salt_base64_2, "UB";
+is $ppr->hash_base64, "JcPos7octOA";
 
 my %pprs;
 while(<DATA>) {
 	chomp;
 	s/(\S+) (\S+) *//;
 	my($salt, $hash) = ($1, $2);
-	my $ppr = Authen::Passphrase::DESCrypt
+	$ppr = Authen::Passphrase::DESCrypt
 			->new(salt_base64 => $salt, hash_base64 => $hash);
 	ok $ppr;
+	ok !$ppr->fold;
+	is $ppr->initial_base64, "...........";
+	is $ppr->nrounds, 25;
 	is $ppr->salt_base64_2, $salt;
 	is $ppr->hash_base64, $hash;
 	eval { $ppr->passphrase };

@@ -13,6 +13,9 @@ hash algorithm
 	$ppr = Authen::Passphrase::LANManager->new(
 		passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::LANManager->from_rfc2307(
+		"{LANMAN}855c3697d9979e78ac404c4ba2c66533");
+
 	$hash = $ppr->hash;
 	$hash_hex = $ppr->hash_hex;
 
@@ -51,15 +54,16 @@ package Authen::Passphrase::LANManager;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Authen::Passphrase::LANManagerHalf;
 use Carp qw(croak);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(first_half second_half);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -139,6 +143,24 @@ sub new($@) {
 		croak "hash not specified";
 	}
 	return $self;
+}
+
+=item Authen::Passphrase::LANManager->from_rfc2307(USERPASSWORD)
+
+Generates a LAN Manager passphrase recogniser from the supplied RFC2307
+encoding.  The string must consist of "B<{LANMAN}>" (or its synonym
+"B<{LANM}>") followed by the hash in hexadecimal; case is ignored.
+
+=cut
+
+sub from_rfc2307($$) {
+	my($class, $userpassword) = @_;
+	if($userpassword =~ /\A\{(?i:lanm(?:an)?)\}/) {
+		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})\z/
+			or croak "malformed {LANMAN} data";
+		return $class->new(hash_hex => $1);
+	}
+	return $class->SUPER::from_rfc2307($userpassword);
 }
 
 =back

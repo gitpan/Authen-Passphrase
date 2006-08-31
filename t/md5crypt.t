@@ -1,4 +1,4 @@
-use Test::More tests => 63;
+use Test::More tests => 69;
 
 BEGIN { use_ok "Authen::Passphrase::MD5Crypt"; }
 
@@ -14,6 +14,18 @@ ok $ppr;
 like $ppr->salt, qr#\A[./0-9A-Za-z]{8}\z#;
 like $ppr->hash_base64, qr#\A[./0-9A-Za-z]{22}\z#;
 ok $ppr->match("wibble");
+
+$ppr = Authen::Passphrase::MD5Crypt
+		->from_crypt('$1$Vd3f8aG6$2vsEqBwwsrvUdUYK40Dtm/');
+ok $ppr;
+is $ppr->salt, "Vd3f8aG6";
+is $ppr->hash_base64, "2vsEqBwwsrvUdUYK40Dtm/";
+
+$ppr = Authen::Passphrase::MD5Crypt
+		->from_rfc2307('{CrYpT}$1$Vd3f8aG6$2vsEqBwwsrvUdUYK40Dtm/');
+ok $ppr;
+is $ppr->salt, "Vd3f8aG6";
+is $ppr->hash_base64, "2vsEqBwwsrvUdUYK40Dtm/";
 
 my %pprs;
 while(<DATA>) {

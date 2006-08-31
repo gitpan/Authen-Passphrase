@@ -1,18 +1,21 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Authen-Passphrase
-version:      0.002
+version:      0.003
 version_from: lib/Authen/Passphrase.pm
 installdirs:  site
 requires:
+    Authen::DecHpwd:               2.0
     Crypt::DES:                    0
     Crypt::Eksblowfish:            0.000
+    Crypt::MySQL:                  0.03
     Crypt::PasswdMD5:              1.0
     Crypt::UnixCrypt_XS:           0.05
     Data::Entropy::Algorithms:     0.000
     Digest:                        1.00
     Digest::MD4:                   1.2
     Digest::MD5:                   1.9953
+    Digest::SHA1:                  0
     MIME::Base64:                  2.21
     Module::Runtime:               0.001
     Params::Classify:              0.000

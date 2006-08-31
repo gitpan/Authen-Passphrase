@@ -8,6 +8,12 @@ Authen::Passphrase::RejectAll - reject all passphrases
 
 	$ppr = Authen::Passphrase::RejectAll->new;
 
+	$ppr = Authen::Passphrase::RejectAll
+		->from_crypt("*");
+
+	$ppr = Authen::Passphrase::RejectAll
+		->from_rfc2307("{CRYPT}*");
+
 	if($ppr->match($passphrase)) { ...
 
 	$passwd = $ppr->as_crypt;
@@ -32,14 +38,17 @@ package Authen::Passphrase::RejectAll;
 use warnings;
 use strict;
 
-our $VERSION = "0.002";
+use Authen::Passphrase 0.003;
+use Carp qw(croak);
+
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 
 # There is only one object of this class, and its content is
 # insignificant.
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -54,6 +63,30 @@ returned from each call.
 	my $singleton = bless({});
 	sub new($) { $singleton }
 }
+
+=item Authen::Passphrase::RejectAll->from_crypt(PASSWD)
+
+Returns a reject-all passphrase recogniser object.  The same object is
+returned from each call.  The argument, a crypt string, must be between
+one and twelve (inclusive) characters long and must not start with "B<$>".
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A[^\$].{0,11}\z/s) {
+		$passwd =~ /\A[!-#\%-9;-~][!-9;-~]{0,11}\z/
+			or croak "malformed reject-all crypt data";
+		return $class->new;
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::RejectAll->from_rfc2307(USERPASSWORD)
+
+Generates a new reject-all passphrase recogniser object from an RFC
+2307 string.  The string must consist of "B<{CRYPT}>" (case insensitive)
+followed by an acceptable crypt string.
 
 =back
 

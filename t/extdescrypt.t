@@ -1,16 +1,26 @@
-use Test::More tests => 61;
+use Test::More tests => 77;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
+
+my $ppr = Authen::Passphrase::DESCrypt->from_crypt("_cD..NaClP7NemfyIO3Y");
+ok $ppr;
+ok $ppr->fold;
+is $ppr->initial_base64, "...........";
+is $ppr->nrounds, 1000;
+is $ppr->salt_base64_4, "NaCl";
+is $ppr->hash_base64, "P7NemfyIO3Y";
 
 my %pprs;
 while(<DATA>) {
 	chomp;
 	s/(\S+) (\S+) (\S+) *//;
 	my($nrounds, $salt, $hash) = ($1, $2, $3);
-	my $ppr = Authen::Passphrase::DESCrypt
+	$ppr = Authen::Passphrase::DESCrypt
 			->new(fold => 1, nrounds_base64 => $nrounds,
 			      salt_base64 => $salt, hash_base64 => $hash);
 	ok $ppr;
+	ok $ppr->fold;
+	is $ppr->initial_base64, "...........";
 	is $ppr->nrounds_base64_4, $nrounds;
 	is $ppr->salt_base64_4, $salt;
 	is $ppr->hash_base64, $hash;

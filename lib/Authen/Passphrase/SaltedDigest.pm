@@ -18,6 +18,10 @@ digest algorithm
 		algorithm => "SHA-1", salt_random => 20,
 		passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::SaltedDigest->from_rfc2307(
+		"{SSHA}gnDZ0aNF04BqsjsDhXAuEPGsy".
+		"UOp9SSx6BnpbYzHoE1UceixDITllg==");
+
 	$algorithm = $ppr->algorithm;
 	$salt = $ppr->salt;
 	$salt_hex = $ppr->salt_hex;
@@ -66,19 +70,20 @@ package Authen::Passphrase::SaltedDigest;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest 1.00;
-use MIME::Base64 2.21 qw(encode_base64);
+use MIME::Base64 2.21 qw(encode_base64 decode_base64);
 use Module::Runtime 0.001 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -166,7 +171,7 @@ sub new($@) {
 				if exists $self->{salt};
 			$value =~ m#\A[\x{0}-\x{ff}]*\z#
 				or croak "\"$value\" is not a valid salt";
-			$self->{salt} = $value;
+			$self->{salt} = "$value";
 		} elsif($attr eq "salt_hex") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -185,7 +190,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]*\z#
 				or croak "\"$value\" is not a valid hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -214,6 +219,55 @@ sub new($@) {
 		croak "hash not specified";
 	}
 	return $self;
+}
+
+=item Authen::Passphrase::SaltedDigest->from_rfc2307(USERPASSWORD)
+
+Generates a salted-digest passphrase recogniser from the supplied
+RFC2307 encoding.  The scheme identifier gives the digest algorithm and
+controls whether salt is permitted.  It is followed by a base 64 string,
+using standard MIME base 64, which encodes the concatenation of the hash
+and salt.
+
+The scheme identifiers accepted are "B<{MD4}>" (unsalted MD4), "B<{MD5}>"
+(unsalted MD5), "B<{RMD160}>" (unsalted RIPEMD-160), "B<{SHA}>" (unsalted
+SHA-1), "B<{SMD5}>" (salted MD5), and "B<{SSHA}>" (salted SHA-1).
+All scheme identifiers are recognised case-insensitively.
+
+=cut
+
+my %rfc2307_scheme_meaning = (
+	"MD4" => ["MD4", 16, 0],
+	"MD5" => ["MD5", 16, 0],
+	"RMD160" => ["Crypt::RIPEMD160-", 20, 0],
+	"SHA" => ["SHA-1", 20, 0],
+	"SMD5" => ["MD5", 16, 1],
+	"SSHA" => ["SHA-1", 20, 1],
+);
+
+sub from_rfc2307($$) {
+	my($class, $userpassword) = @_;
+	return $class->SUPER::from_rfc2307($userpassword)
+		unless $userpassword =~ /\A\{([-0-9A-Za-z]+)\}/;
+	my $scheme = uc($1);
+	my $meaning = $rfc2307_scheme_meaning{$scheme};
+	return $class->SUPER::from_rfc2307($userpassword)
+		unless defined $meaning;
+	croak "malformed {$scheme} data"
+		unless $userpassword =~
+			m#\A\{.*?\}
+			  ((?>(?:[A-Za-z0-9+/]{4})*)
+			   (?:|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=|
+			       [A-Za-z0-9+/][AQgw]==))\z#x;
+	my $hash_and_salt = decode_base64($1);
+	my($algorithm, $hash_len, $salt_allowed) = @$meaning;
+	croak "insufficient hash data for {$scheme}"
+		if length($hash_and_salt) < $hash_len;
+	croak "too much hash data for {$scheme}"
+		if !$salt_allowed && length($hash_and_salt) > $hash_len;
+	return $class->new(algorithm => $algorithm,
+		salt => substr($hash_and_salt, $hash_len),
+		hash => substr($hash_and_salt, 0, $hash_len));
 }
 
 =back

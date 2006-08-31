@@ -15,6 +15,9 @@ crypt()
 			salt_random => 12,
 			passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::DESCrypt
+		->from_crypt('myTYK.j.88/9s');
+
 	$ppr = Authen::Passphrase::DESCrypt->new(
 			fold => 1,
 			initial => "xyzzy!!!",
@@ -114,6 +117,7 @@ package Authen::Passphrase::DESCrypt;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.05 qw(
 	fold_password crypt_rounds
@@ -123,12 +127,12 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -215,7 +219,7 @@ sub new($@) {
 				if exists $self->{initial};
 			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
 				or croak "not a valid raw block";
-			$self->{initial} = $value;
+			$self->{initial} = "$value";
 		} elsif($attr eq "initial_base64") {
 			croak "initial block specified redundantly"
 				if exists $self->{initial};
@@ -228,7 +232,7 @@ sub new($@) {
 				if exists $self->{nrounds};
 			croak "\"$value\" is not a valid number of rounds"
 				unless $value == int($value) && $value >= 0;
-			$self->{nrounds} = $value;
+			$self->{nrounds} = 0+$value;
 		} elsif($attr eq "nrounds_base64") {
 			croak "number of rounds specified redundantly"
 				if exists $self->{nrounds};
@@ -241,7 +245,7 @@ sub new($@) {
 			croak "\"$value\" is not a valid salt"
 				unless $value == int($value) &&
 					$value >= 0 && $value < 16777216;
-			$self->{salt} = $value;
+			$self->{salt} = 0+$value;
 		} elsif($attr eq "salt_base64") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -262,7 +266,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
 				or croak "not a valid raw hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_base64") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -280,7 +284,7 @@ sub new($@) {
 			croak "unrecognised attribute `$attr'";
 		}
 	}
-	$self->{fold} = 0 unless exists $self->{fold};
+	$self->{fold} = !!0 unless exists $self->{fold};
 	$self->{initial} = "\0\0\0\0\0\0\0\0" unless exists $self->{initial};
 	$self->{nrounds} = 25 unless exists $self->{nrounds};
 	croak "salt not specified" unless exists $self->{salt};
@@ -288,6 +292,45 @@ sub new($@) {
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
 }
+
+=item Authen::Passphrase::DESCrypt->from_crypt(PASSWD)
+
+Generates a new passphrase recogniser object using the DES-based crypt()
+algorithm, from a crypt string.  Two forms of crypt string are supported.
+
+The first form of crypt string must consist of 13 base 64 digits.
+The first two give the salt, and the next eleven give the hash.
+Long passphrases are not folded, the initial block is all bits zero,
+and 25 encryption rounds are performed.
+
+The second form of crypt string must consist of an "B<_>" followed
+by 19 base 64 digits.  The first four give the number of encryption
+rounds, the next four give the salt, and the next eleven give the hash.
+Long passphrases are folded, and the initial block is all bits zero.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A[^\$].{12}\z/s) {
+		$passwd =~ m#\A([./0-9A-Za-z]{2})([./0-9A-Za-z]{11})\z#
+			or croak "malformed DES crypt data";
+		return $class->new(salt_base64 => $1, hash_base64 => $2);
+	} elsif($passwd =~ /\A_.{19}\z/s) {
+		$passwd =~ m#\A_([./0-9A-Za-z]{4})([./0-9A-Za-z]{4})
+				([./0-9A-Za-z]{11})\z#x
+			or croak "malformed _ data";
+		return $class->new(fold => 1, nrounds_base64 => $1,
+				   salt_base64 => $2, hash_base64 => $3);
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::DESCrypt->from_rfc2307(USERPASSWORD)
+
+Generates a new passphrase recogniser object using the DES-based
+crypt() algorithm, from an RFC 2307 string.  The string must consist of
+"B<{CRYPT}>" (case insensitive) followed by an acceptable crypt string.
 
 =back
 

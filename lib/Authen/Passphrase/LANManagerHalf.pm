@@ -13,6 +13,12 @@ Manager algorithm
 	$ppr = Authen::Passphrase::LANManagerHalf->new(
 		passphrase => "passphr");
 
+	$ppr = Authen::Passphrase::LANManagerHalf->from_crypt(
+		'$LM$855c3697d9979e78');
+
+	$ppr = Authen::Passphrase::LANManagerHalf->from_rfc2307(
+		'{CRYPT}$LM$855c3697d9979e78');
+
 	$hash = $ppr->hash;
 	$hash_hex = $ppr->hash_hex;
 
@@ -51,15 +57,16 @@ package Authen::Passphrase::LANManagerHalf;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::DES;
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -101,7 +108,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
 				or croak "not a valid LAN Manager half hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -126,6 +133,30 @@ sub new($@) {
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
 }
+
+=item Authen::Passphrase::LANManagerHalf->from_crypt(PASSWD)
+
+Generates a new LAN Manager half passphrase recogniser object from a
+crypt string.  The crypt string must consist of "B<$LM$>" followed by
+the hash in lowercase hexadecimal.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A\$LM\$/) {
+		$passwd =~ m#\A\$LM\$([0-9a-f]{16})\z#
+			or croak "malformed \$LM\$ data";
+		return $class->new(hash_hex => $1);
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::LANManagerHalf->from_rfc2307(USERPASSWORD)
+
+Generates a new LAN Manager half passphrase recogniser object from an RFC
+2307 string.  The string must consist of "B<{CRYPT}>" (case insensitive)
+followed by an acceptable crypt string.
 
 =back
 

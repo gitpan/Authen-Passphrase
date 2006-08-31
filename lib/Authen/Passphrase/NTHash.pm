@@ -12,6 +12,12 @@ Authen::Passphrase::NTHash - passphrases using the NT-Hash algorithm
 	$ppr = Authen::Passphrase::NTHash->new(
 		passphrase => "passphrase");
 
+	$ppr = Authen::Passphrase::NTHash->from_crypt(
+		'$3$$7f8fe03093cc84b267b109625f6bbf4b');
+
+	$ppr = Authen::Passphrase::NTHash->from_rfc2307(
+		'{MSNT}7f8fe03093cc84b267b109625f6bbf4b');
+
 	$hash = $ppr->hash;
 	$hash_hex = $ppr->hash_hex;
 
@@ -41,15 +47,16 @@ package Authen::Passphrase::NTHash;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -91,7 +98,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
 				or croak "not a valid MD4 hash";
-			$self->{hash} = $value;
+			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
@@ -112,6 +119,50 @@ sub new($@) {
 	$self->{hash} = $self->_hash_of($passphrase) if defined $passphrase;
 	croak "hash not specified" unless exists $self->{hash};
 	return $self;
+}
+
+=item Authen::Passphrase::NTHash->from_crypt(PASSWD)
+
+Generates a new NT-Hash passphrase recogniser object from a crypt string.
+Two forms are accepted.  In the first form, the he crypt string must
+consist of "B<$3$$>" (note the extra "B<$>") followed by the hash in
+lowercase hexadecimal.  In the second form, the he crypt string must
+consist of "B<$NT$>" followed by the hash in lowercase hexadecimal.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	if($passwd =~ /\A\$3\$/) {
+		$passwd =~ m#\A\$3\$\$([0-9a-f]{32})\z#
+			or croak "malformed \$3\$ data";
+		return $class->new(hash_hex => $1);
+	} elsif($passwd =~ /\A\$NT\$/) {
+		$passwd =~ m#\A\$NT\$([0-9a-f]{32})\z#
+			or croak "malformed \$NT\$ data";
+		return $class->new(hash_hex => $1);
+	}
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::NTHash->from_rfc2307(USERPASSWORD)
+
+Generates a new NT-Hash passphrase recogniser object from an RFC
+2307 string.  Two forms are accepted.  In the first form, the string
+must consist of "B<{MSNT}>" followed by the hash in hexadecimal; case
+is ignored.  In the second form, the string must consist of "B<{CRYPT}>"
+(case insensitive) followed by an acceptable crypt string.
+
+=cut
+
+sub from_rfc2307($$) {
+	my($class, $userpassword) = @_;
+	if($userpassword =~ /\A\{(?i:msnt)\}/) {
+		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})\z/
+			or croak "malformed {MSNT} data";
+		return $class->new(hash_hex => $1);
+	}
+	return $class->SUPER::from_rfc2307($userpassword);
 }
 
 =back

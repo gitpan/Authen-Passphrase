@@ -1,4 +1,4 @@
-use Test::More tests => 71;
+use Test::More tests => 75;
 
 BEGIN { use_ok "Authen::Passphrase::LANManager"; }
 
@@ -13,6 +13,16 @@ $ppr = Authen::Passphrase::LANManager
 		->new(passphrase => "wibblewobble");
 ok $ppr;
 is $ppr->hash_hex, "8ff3acd71203e5ad12f825806ba3a168";
+
+$ppr = Authen::Passphrase::LANManager
+	->from_rfc2307("{LANMAN}f67023e95cc9dc1CAad3b435b51404ee");
+ok $ppr;
+is $ppr->hash_hex, "f67023e95cc9dc1caad3b435b51404ee";
+
+$ppr = Authen::Passphrase::LANManager
+	->from_rfc2307("{LANM}f67023e95cc9dc1CAad3b435b51404ee");
+ok $ppr;
+is $ppr->hash_hex, "f67023e95cc9dc1caad3b435b51404ee";
 
 my %pprs;
 my $i = 0;

@@ -1,4 +1,4 @@
-use Test::More tests => 59;
+use Test::More tests => 63;
 
 BEGIN { use_ok "Authen::Passphrase::LANManagerHalf"; }
 
@@ -7,6 +7,16 @@ my $ppr = Authen::Passphrase::LANManagerHalf
 ok $ppr;
 is $ppr->hash, "\xfa\x19\x61\x43\x0a\x96\xf9\xbe";
 is $ppr->hash_hex, "fa1961430a96f9be";
+
+$ppr = Authen::Passphrase::LANManagerHalf
+	->from_crypt('$LM$f67023e95cc9dc1c');
+ok $ppr;
+is $ppr->hash_hex, "f67023e95cc9dc1c";
+
+$ppr = Authen::Passphrase::LANManagerHalf
+	->from_rfc2307('{CRYPT}$LM$f67023e95cc9dc1c');
+ok $ppr;
+is $ppr->hash_hex, "f67023e95cc9dc1c";
 
 my %pprs;
 my $i = 0;

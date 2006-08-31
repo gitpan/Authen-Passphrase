@@ -68,12 +68,13 @@ package Authen::Passphrase::BigCrypt;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Authen::Passphrase::DESCrypt;
 use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 

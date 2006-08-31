@@ -8,6 +8,12 @@ Authen::Passphrase::AcceptAll - accept any passphrase
 
 	$ppr = Authen::Passphrase::AcceptAll->new;
 
+	$ppr = Authen::Passphrase::AcceptAll
+		->from_crypt("");
+
+	$ppr = Authen::Passphrase::AcceptAll
+		->from_rfc2307("{CRYPT}");
+
 	if($ppr->match($passphrase)) { ...
 
 	$passphrase = $ppr->passphrase;
@@ -33,14 +39,17 @@ package Authen::Passphrase::AcceptAll;
 use warnings;
 use strict;
 
-our $VERSION = "0.002";
+use Authen::Passphrase 0.003;
+use Carp qw(croak);
+
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 
 # There is only one object of this class, and its content is
 # insignificant.
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -55,6 +64,25 @@ returned from each call.
 	my $singleton = bless({});
 	sub new($) { $singleton }
 }
+
+=item Authen::Passphrase::AcceptAll->from_crypt("")
+
+Returns an accept-all passphrase recogniser object.  The same object is
+returned from each call.  The argument must be the empty string.
+
+=cut
+
+sub from_crypt($$) {
+	my($class, $passwd) = @_;
+	return $class->new if $passwd eq "";
+	return $class->SUPER::from_crypt($passwd);
+}
+
+=item Authen::Passphrase::AcceptAll->from_rfc2307(USERPASSWORD)
+
+Generates a new accept-all passphrase recogniser object from an RFC
+2307 string.  The string must consist of "B<{CRYPT}>" (case insensitive)
+followed by an acceptable crypt string.
 
 =back
 

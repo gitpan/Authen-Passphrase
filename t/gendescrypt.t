@@ -1,4 +1,4 @@
-use Test::More tests => 66;
+use Test::More tests => 71;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
 
@@ -12,6 +12,7 @@ while(<DATA>) {
 			      nrounds_base64 => $nrounds,
 			      salt_base64 => $salt, hash_base64 => $hash);
 	ok $ppr;
+	ok $ppr->fold;
 	is $ppr->nrounds_base64_4, $nrounds;
 	is $ppr->salt_base64_4, $salt;
 	is $ppr->initial_base64, $initial;

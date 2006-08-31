@@ -33,15 +33,16 @@ package Authen::Passphrase::Clear;
 use warnings;
 use strict;
 
+use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.002";
+our $VERSION = "0.003";
 
 use base qw(Authen::Passphrase);
 
 # An object of this class is a blessed scalar containing the passphrase.
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
 
 =over
 
@@ -54,7 +55,26 @@ passphrase in cleartext and accepts only that passphrase.
 
 sub new($$) {
 	my($class, $passphrase) = @_;
+	$passphrase = "$passphrase";
 	return bless(\$passphrase, $class);
+}
+
+=item Authen::Passphrase::Clear->from_rfc2307(USERPASSWORD)
+
+Generates a cleartext passphrase recogniser from the supplied RFC2307
+encoding.  The string must consist of "B<{CLEARTEXT}>" (case insensitive)
+followed by the passphrase.
+
+=cut
+
+sub from_rfc2307($$) {
+	my($class, $userpassword) = @_;
+	if($userpassword =~ /\A\{(?i:cleartext)\}/) {
+		$userpassword =~ /\A\{.*?\}([!-~]*)\z/
+			or croak "malformed {CLEARTEXT} data";
+		return $class->new($1);
+	}
+	return $class->SUPER::from_rfc2307($userpassword);
 }
 
 =back

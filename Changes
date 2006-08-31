@@ -1,3 +1,33 @@
+version 0.003; 2006-08-31
+
+  * implement VMS Purdy polynomial algorithm family (crypt identifiers
+    $VMS1$, $VMS2$, and $VMS3$) in Authen::Passphrase::VMSPurdy based
+    on Authen::DecHpwd module
+
+  * implement phpass algorithm (crypt identifier $P$) in
+    Authen::Passphrase::PHPass
+
+  * implement MySQL v3.23 algorithm in Authen::Passphrase::MySQL323
+    based on Crypt::MySQL module
+
+  * implement MySQL v4.1 algorithm in Authen::Passphrase::MySQL41
+
+  * in from_crypt, when handling known but unimplemented schemes, say so
+    instead of not recognising the scheme identifier
+
+  * move from_crypt and from_rfc2307 parsing code from Authen::Passphrase
+    into scheme-specific modules
+
+  * put all data stored in objects into canonical form, to avoid
+    propagating dualvars or other oddities
+
+  * document {CRYPT16}, ambiguously used by Exim
+
+  * make {CRYPT} documentation more explicit
+
+  * fix a bogus reference to DES in the documentation of
+    A::P::BlowfishCrypt
+
 version 0.002; 2006-08-12
 
   * implement LAN Manager hash scheme (RFC 2307 identifiers {LANMAN}

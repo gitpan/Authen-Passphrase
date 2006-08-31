@@ -1,12 +1,15 @@
-use Test::More tests => 66;
+use Test::More tests => 70;
 
 use MIME::Base64 2.21 qw(encode_base64);
 
 BEGIN { use_ok "Authen::Passphrase::SaltedDigest"; }
 
-SKIP: {
-eval { Digest->new("SHA-1"); };
-skip "no SHA-1 facility", 65 unless $@ eq "";
+my $ppr = Authen::Passphrase::SaltedDigest
+		->from_rfc2307("{SSHA}Su3QumFIRp1xFfRZ49hwaJmme+r1iVoM");
+ok $ppr;
+is $ppr->algorithm, "SHA-1";
+is $ppr->salt_hex, "f5895a0c";
+is $ppr->hash_hex, "4aedd0ba6148469d7115f459e3d8706899a67bea";
 
 my %pprs;
 my $i = 0;
@@ -39,8 +42,6 @@ foreach my $rightphrase (sort keys %pprs) {
 	foreach my $passphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
-}
-
 }
 
 __DATA__
