@@ -30,7 +30,7 @@ The passphrase is first hashed using SHA-1, then the output of that
 stage is hashed using SHA-1 again.  The final hash is the output of the
 second SHA-1.  No salt is used.
 
-In MySQL the hash is represented as a "*" followed by 40 uppercase
+In MySQL the hash is represented as a "B<*>" followed by 40 uppercase
 hexadecimal digits.
 
 The lack of salt is a weakness in this scheme.  Salted SHA-1 is a better
@@ -47,7 +47,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::SHA1 qw(sha1);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);

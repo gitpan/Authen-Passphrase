@@ -61,7 +61,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::DES;
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);

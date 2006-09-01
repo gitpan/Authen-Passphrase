@@ -30,7 +30,8 @@ and tab characters.  No salt is used.  62 bits of hash are generated.
 Each character influences only a minority of the result bits, so similar
 passphrases of the same length have noticeably similar hashes.
 
-In MySQL the hash is stored in hexadecimal.
+In MySQL the hash is represented as a string of sixteen lowercase
+hexadecimal digits.
 
 I<Warning:> This is not a serious cryptographic algorithm.  Do not use
 for any security purpose.
@@ -46,7 +47,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::MySQL 0.03 qw(password);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);

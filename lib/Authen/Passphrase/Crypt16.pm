@@ -71,7 +71,7 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(first_half second_half);

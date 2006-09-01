@@ -5,6 +5,7 @@ WriteMakefile(
 	VERSION_FROM => "lib/Authen/Passphrase.pm",
 	PREREQ_PM => {
 		Authen::DecHpwd => "2.0",
+		Crypt::Blowfish => "2.00",
 		Crypt::DES => 0,
 		Crypt::Eksblowfish => "0.000",
 		Crypt::MySQL => "0.03",

@@ -1,14 +1,35 @@
+version 0.004; 2006-09-01
+
+  * implement Eggdrop blowfish.mod algorithm in
+    Authen::Passphrase::EggdropBlowfish based on the Crypt::Blowfish
+    module; initially limited to passphrases up to 56 bytes
+
+  * in A::P::VMSPurdy, change ->hash_hex method to output in uppercase,
+    as used in crypt strings
+
+  * in A::P::VMSPurdy, add a "salt_hex =>" constructor parameter and a
+    ->salt_hex method, handling salt in the hexadecimal format used in
+    crypt strings
+
+  * in documentation for A::P::DESCrypt, move the security warning to
+    apply to both the traditional and extended schemes
+
+  * in documentation for A::P::MySQL323, be more explicit about storage
+    format
+
+  * documentation markup fix in A::P::BlowfishCrypt
+
 version 0.003; 2006-08-31
 
   * implement VMS Purdy polynomial algorithm family (crypt identifiers
     $VMS1$, $VMS2$, and $VMS3$) in Authen::Passphrase::VMSPurdy based
-    on Authen::DecHpwd module
+    on the Authen::DecHpwd module
 
   * implement phpass algorithm (crypt identifier $P$) in
     Authen::Passphrase::PHPass
 
   * implement MySQL v3.23 algorithm in Authen::Passphrase::MySQL323
-    based on Crypt::MySQL module
+    based on the Crypt::MySQL module
 
   * implement MySQL v4.1 algorithm in Authen::Passphrase::MySQL41
 

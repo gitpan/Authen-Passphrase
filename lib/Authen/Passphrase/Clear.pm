@@ -36,7 +36,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 

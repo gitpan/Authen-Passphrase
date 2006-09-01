@@ -56,8 +56,6 @@ referred to merely as "crypt()".  To handle the whole range of passphrase
 schemes supported by the modern crypt(), see the C<from_crypt> constructor
 and the C<as_crypt> method in L<Authen::Passphrase>.
 
-=head2 The traditional DES-based Unix crypt() password scheme
-
 I<Warning:> this password scheme is weak by modern standards, and in
 any case does not support a large password space.  Cracking crypt()ed
 passwords has been a routine activity since the early 1990s.  This scheme
@@ -65,6 +63,8 @@ is supported for compatibility reasons only, and should not be used
 except when compatibility is required.  Do not use this in the design of
 any new system or for new passwords in any system that supports better
 passphrase schemes.
+
+=head2 The traditional DES-based Unix crypt() password scheme
 
 The traditional Unix crypt() password scheme is based on the DES block
 encryption algorithm.  Using the password as a 56-bit key, it passes a
@@ -127,7 +127,7 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);

@@ -85,7 +85,7 @@ use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);

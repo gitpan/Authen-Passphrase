@@ -82,7 +82,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt username hash);
@@ -113,6 +113,13 @@ VMS username syntax.
 =item B<salt>
 
 The salt, as an integer in the range [0, 65536).
+
+=item B<salt_hex>
+
+The salt, as a string of four hexadecimal digits.  The first two
+digits must give the least-significant byte and the last two give
+the most-significant byte, with most-significant nybble first within
+each byte.
 
 =item B<salt_random>
 
@@ -165,6 +172,12 @@ sub new($@) {
 			$value == int($value) && $value >= 0 && $value < 65536
 				or croak "not a valid salt";
 			$self->{salt} = 0+$value;
+		} elsif($attr eq "salt_hex") {
+			croak "salt specified redundantly"
+				if exists $self->{salt};
+			$value =~ /\A([0-9a-fA-F]{2})([0-9a-fA-F]{2})\z/
+				or croak "not a valid salt";
+			$self->{salt} = hex($2.$1);
 		} elsif($attr eq "salt_random") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
@@ -227,11 +240,11 @@ sub from_crypt($$) {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$VMS([123])\$/) {
 		my $alg = $1;
-		$passwd =~ /\A\$VMS[123]\$([0-9A-F]{2})([0-9A-F]{2})
+		$passwd =~ /\A\$VMS[123]\$([0-9A-F]{4})
 			    ([0-9A-F]{16})([_\$0-9A-Z]{1,31})\z/x
 			or croak "malformed \$VMS${alg}\$ data";
 		return $class->new(algorithm => $decode_crypt_alg_num{$alg},
-			username => $4, salt => hex($2.$1), hash_hex => $3);
+			username => $3, salt_hex => $1, hash_hex => $2);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -286,6 +299,20 @@ sub salt($) {
 	return $self->{salt};
 }
 
+=item $ppr->salt_hex
+
+Returns the salt, as a string of four hexadecimal digits.  The first
+two digits give the least-significant byte and the last two give the
+most-significant byte, with most-significant nybble first within each
+byte.
+
+=cut
+
+sub salt_hex($) {
+	my __PACKAGE__ $self = shift;
+	return sprintf("%02X%02X", $self->{salt} & 0xff, $self->{salt} >> 8);
+}
+
 =item $ppr->hash
 
 Returns the hash value, as a string of eight bytes.
@@ -299,13 +326,13 @@ sub hash($) {
 
 =item $ppr->hash_hex
 
-Returns the hash value, as a string of 16 hexadecimal digits.
+Returns the hash value, as a string of 16 uppercase hexadecimal digits.
 
 =cut
 
 sub hash_hex($) {
 	my __PACKAGE__ $self = shift;
-	return unpack("H*", $self->{hash});
+	return uc(unpack("H*", $self->{hash}));
 }
 
 =item $ppr->match(PASSPHRASE)
@@ -353,8 +380,7 @@ my %crypt_alg_num = (
 sub as_crypt($) {
 	my __PACKAGE__ $self = shift;
 	return "\$VMS".$crypt_alg_num{$self->{algorithm}}."\$".
-		sprintf("%02X%02X", $self->{salt} & 0xff, $self->{salt} >> 8).
-		uc($self->hash_hex).$self->{username};
+		$self->salt_hex.$self->hash_hex.$self->{username};
 }
 
 =back

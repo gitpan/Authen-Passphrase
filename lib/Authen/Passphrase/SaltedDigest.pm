@@ -78,7 +78,7 @@ use MIME::Base64 2.21 qw(encode_base64 decode_base64);
 use Module::Runtime 0.001 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);

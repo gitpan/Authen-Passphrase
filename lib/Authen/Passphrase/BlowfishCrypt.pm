@@ -89,7 +89,7 @@ use Carp qw(croak);
 use Crypt::Eksblowfish::Bcrypt 0.000 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 use base qw(Authen::Passphrase);
 use fields qw(key_nul cost salt hash);

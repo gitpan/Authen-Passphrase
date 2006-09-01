@@ -11,6 +11,7 @@ lib/Authen/Passphrase/BlowfishCrypt.pm
 lib/Authen/Passphrase/Clear.pm
 lib/Authen/Passphrase/Crypt16.pm
 lib/Authen/Passphrase/DESCrypt.pm
+lib/Authen/Passphrase/EggdropBlowfish.pm
 lib/Authen/Passphrase/LANManager.pm
 lib/Authen/Passphrase/LANManagerHalf.pm
 lib/Authen/Passphrase/MD5Crypt.pm
@@ -27,6 +28,7 @@ t/bigcrypt.t
 t/blowfishcrypt.t
 t/clear.t
 t/crypt16.t
+t/eggdropblowfish.t
 t/extdescrypt.t
 t/gendescrypt.t
 t/intdescrypt.t
