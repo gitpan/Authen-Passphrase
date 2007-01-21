@@ -89,7 +89,7 @@ use Carp qw(croak);
 use Crypt::Eksblowfish::Bcrypt 0.000 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(key_nul cost salt hash);
@@ -154,7 +154,7 @@ The cost and salt must be given, and either the hash or the passphrase.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::BlowfishCrypt $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -259,7 +259,7 @@ passphrase before using it as a key.
 =cut
 
 sub key_nul($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{key_nul};
 }
 
@@ -271,7 +271,7 @@ be performed.
 =cut
 
 sub cost($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{cost};
 }
 
@@ -290,7 +290,7 @@ Returns the salt, as a string of sixteen bytes.
 =cut
 
 sub salt($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{salt};
 }
 
@@ -301,7 +301,7 @@ Returns the salt, as a string of 22 base 64 digits.
 =cut
 
 sub salt_base64($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return en_base64($self->{salt});
 }
 
@@ -312,7 +312,7 @@ Returns the hash value, as a string of 23 bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{hash};
 }
 
@@ -323,7 +323,7 @@ Returns the hash value, as a string of 31 base 64 digits.
 =cut
 
 sub hash_base64($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return en_base64($self->{hash});
 }
 
@@ -338,7 +338,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	my($passphrase) = @_;
 	return bcrypt_hash({
 		key_nul => $self->{key_nul},
@@ -348,13 +348,13 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	croak "passphrase can't be expressed as a crypt string"
 		if $self->{cost} > 99;
 	return sprintf("\$2%s\$%02d\$%s%s", $self->key_nul ? "a" : "",
@@ -374,7 +374,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

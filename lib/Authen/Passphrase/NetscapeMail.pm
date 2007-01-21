@@ -54,7 +54,7 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash);
@@ -102,7 +102,7 @@ The salt must be given, and either the hash or the passphrase.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::NetscapeMail $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -180,7 +180,7 @@ Returns the salt value, as a string of 32 bytes.
 =cut
 
 sub salt($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	return $self->{salt};
 }
 
@@ -191,7 +191,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	return $self->{hash};
 }
 
@@ -202,7 +202,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 =cut
 
 sub hash_hex($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	return unpack("H*", $self->{hash});
 }
 
@@ -215,7 +215,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	my($passphrase) = @_;
 	my $ctx = Digest::MD5->new;
 	$ctx->add($self->{salt});
@@ -227,13 +227,13 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_rfc2307($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NetscapeMail $self = shift;
 	croak "can't put this salt into an RFC 2307 string"
 		if $self->{salt} =~ /[^!-~]/;
 	return "{NS-MTA-MD5}".$self->hash_hex.$self->{salt};
@@ -252,7 +252,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

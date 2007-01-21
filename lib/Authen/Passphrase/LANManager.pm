@@ -36,7 +36,7 @@ familiar with the documentation for that class.
 The hash algorithm can be used on up to fourteen Latin-1 characters of
 passphrase.  First the passphrase is folded to uppercase, and zero-padded
 to fourteen bytes.  Then it is split into two halves.  Each seven-byte
-half used as a 56-bit DES key, to encrypt the fixed plaintext block
+half is used as a 56-bit DES key, to encrypt the fixed plaintext block
 "KGS!@#$%".  The eight-byte ciphertexts are concatenated to form the
 sixteen-byte hash.  There is no salt.
 
@@ -58,7 +58,7 @@ use Authen::Passphrase 0.003;
 use Authen::Passphrase::LANManagerHalf;
 use Carp qw(croak);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(first_half second_half);
@@ -94,7 +94,7 @@ Either the hash or the passphrase must be given.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::LANManager $self = fields::new($class);
 	my $hash;
 	my $passphrase;
 	while(@_) {
@@ -176,7 +176,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	return $self->{first_half}->hash.$self->{second_half}->hash;
 }
 
@@ -187,7 +187,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 =cut
 
 sub hash_hex($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	return unpack("H*", $self->hash);
 }
 
@@ -199,7 +199,7 @@ C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 =cut
 
 sub first_half($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	return $self->{first_half};
 }
 
@@ -211,7 +211,7 @@ C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 =cut
 
 sub second_half($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	return $self->{second_half};
 }
 
@@ -224,13 +224,13 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _passphrase_acceptable($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	my($passphrase) = @_;
 	return $passphrase =~ /\A[\x{0}-\x{ff}]{0,14}\z/;
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	my($passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->{first_half}->match(substr($passphrase, 0, 7)) &&
@@ -241,7 +241,7 @@ sub match($$) {
 }
 
 sub as_rfc2307($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManager $self = shift;
 	return "{LANMAN}".$self->hash_hex;
 }
 
@@ -259,7 +259,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

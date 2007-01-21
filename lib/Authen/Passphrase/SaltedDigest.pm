@@ -78,7 +78,7 @@ use MIME::Base64 2.21 qw(encode_base64 decode_base64);
 use Module::Runtime 0.001 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);
@@ -157,7 +157,7 @@ The digest algorithm must be given, and either the hash or the passphrase.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::SaltedDigest $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -343,7 +343,7 @@ can be represented in RFC 2307 form.
 =cut
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::SaltedDigest $self = shift;
 	my($passphrase) = @_;
 	my $alg = $self->{algorithm};
 	my $ctx;
@@ -378,7 +378,7 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::SaltedDigest $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
@@ -426,7 +426,7 @@ sub as_rfc2307($) {
 =head1 SEE ALSO
 
 L<Authen::Passphrase>,
-L<Crypt::Passwd>
+L<Crypt::SaltedHash>
 
 =head1 AUTHOR
 
@@ -434,7 +434,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

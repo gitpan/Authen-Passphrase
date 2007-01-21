@@ -61,7 +61,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::DES;
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -97,7 +97,7 @@ Either the hash or the passphrase must be given.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::LANManagerHalf $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -171,7 +171,7 @@ Returns the hash value, as a string of 8 bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return $self->{hash};
 }
 
@@ -182,7 +182,7 @@ Returns the hash value, as a string of 16 hexadecimal digits.
 =cut
 
 sub hash_hex($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return unpack("H*", $self->{hash});
 }
 
@@ -197,13 +197,13 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _passphrase_acceptable($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
 	return $passphrase =~ /\A[\x{0}-\x{ff}]{0,7}\z/;
 }
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
 	$passphrase = uc($passphrase);
 	$passphrase = "\0".$passphrase."\0\0\0\0\0\0\0\0";
@@ -217,14 +217,14 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return "\$LM\$".$self->hash_hex;
 }
 
@@ -242,7 +242,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

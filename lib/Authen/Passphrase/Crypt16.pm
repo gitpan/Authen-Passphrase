@@ -28,9 +28,9 @@ Authen::Passphrase::Crypt16 - passphrases using Ultrix crypt16 algorithm
 
 An object of this class encapsulates a passphrase hashed using the
 "crypt16" hash function found in Ultrix and Tru64.  Do not confuse
-this with the "bigcrypt" found on HP-UX, Digital Unix, and OSF/1
-(for which see L<Authen::Passphrase::BigCrypt>.  This is a subclass
-of C<Authen::Passphrase>, and this document assumes that the reader is
+this with the "bigcrypt" found on HP-UX, Digital Unix, and OSF/1 (for
+which see L<Authen::Passphrase::BigCrypt>).  This is a subclass of
+C<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 This is a derivation of the original DES-based crypt function found on all
@@ -71,7 +71,7 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(first_half second_half);
@@ -122,7 +122,7 @@ The salt must be given, and either the hash or the passphrase.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::Crypt16 $self = fields::new($class);
 	my $salt;
 	my $hash;
 	my $passphrase;
@@ -209,7 +209,7 @@ Returns the salt, as a Perl integer.
 =cut
 
 sub salt($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->salt;
 }
 
@@ -220,7 +220,7 @@ Returns the salt, as a string of two base 64 digits.
 =cut
 
 sub salt_base64_2($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->salt_base64_2;
 }
 
@@ -231,7 +231,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->hash.$self->{second_half}->hash;
 }
 
@@ -244,7 +244,7 @@ a base64 encoding of the combined hash.
 =cut
 
 sub hash_base64($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->hash_base64.
 		$self->{second_half}->hash_base64;
 }
@@ -257,7 +257,7 @@ C<Authen::Passphrase::DESCrypt> passphrase recogniser.
 =cut
 
 sub first_half($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half};
 }
 
@@ -269,7 +269,7 @@ C<Authen::Passphrase::DESCrypt> passphrase recogniser.
 =cut
 
 sub second_half($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{second_half};
 }
 
@@ -280,7 +280,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::Crypt16 $self = shift;
 	my($passphrase) = @_;
 	return $self->{first_half}->match(substr($passphrase, 0, 8)) &&
 		$self->{second_half}->match(
@@ -300,7 +300,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

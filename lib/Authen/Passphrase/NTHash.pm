@@ -51,7 +51,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -87,7 +87,7 @@ Either the hash or the passphrase must be given.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::NTHash $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -204,7 +204,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NTHash $self = shift;
 	my($passphrase) = @_;
 	$passphrase = substr($passphrase, 0, 128);
 	$passphrase =~ s/(.)/pack("v", ord($1))/eg;
@@ -212,7 +212,7 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::NTHash $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
@@ -240,7 +240,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

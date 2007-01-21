@@ -1,3 +1,16 @@
+version 0.005; 2007-01-21
+
+  * bugfix: avoid "my __PACKAGE__", for compatibility with perl v5.6
+
+  * point to Crypt::SaltedHash from documentation for A::P::SaltedDigest
+
+  * remove bogus link to Crypt::Passwd from documentation for
+    A::P::SaltedDigest
+
+  * grammar fix in documentation for A::P::LANManager
+
+  * punctuation fix in documentation for A::P::Crypt16
+
 version 0.004; 2006-09-01
 
   * implement Eggdrop blowfish.mod algorithm in

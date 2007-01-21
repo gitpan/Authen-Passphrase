@@ -127,7 +127,7 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);
@@ -465,7 +465,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::DESCrypt $self = shift;
 	my($passphrase) = @_;
 	$passphrase = fold_password($passphrase) if $self->{fold};
 	return crypt_rounds($passphrase, $self->{nrounds}, $self->{salt},
@@ -473,7 +473,7 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::DESCrypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
@@ -504,7 +504,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

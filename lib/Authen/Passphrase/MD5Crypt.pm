@@ -85,7 +85,7 @@ use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);
@@ -130,7 +130,7 @@ The salt must be given, and either the hash or the passphrase.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::MD5Crypt $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -241,7 +241,7 @@ bytes, and it cannot contain any NUL or "B<$>" characters.
 =cut
 
 sub _hash_base64_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::MD5Crypt $self = shift;
 	my($passphrase) = @_;
 	die "can't use a crypt-incompatible salt yet ".
 			"(need generalised Crypt::MD5Passwd)"
@@ -253,7 +253,7 @@ sub _hash_base64_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::MD5Crypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_base64_of($passphrase) eq $self->{hash_base64};
 }
@@ -279,7 +279,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

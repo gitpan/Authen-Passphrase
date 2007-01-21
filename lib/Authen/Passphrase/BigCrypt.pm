@@ -74,7 +74,7 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 
@@ -256,7 +256,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::BigCrypt $self = shift;
 	my($passphrase) = @_;
 	my $nsegs = $passphrase eq "" ? 1 : ((length($passphrase) + 7) >> 3);
 	return 0 unless $nsegs == @$self;
@@ -280,7 +280,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

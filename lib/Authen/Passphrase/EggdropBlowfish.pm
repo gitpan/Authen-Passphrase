@@ -59,7 +59,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::Blowfish 2.00;
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -124,7 +124,7 @@ Either the hash or the passphrase must be given.
 
 sub new($@) {
 	my $class = shift;
-	my __PACKAGE__ $self = fields::new($class);
+	my Authen::Passphrase::EggdropBlowfish $self = fields::new($class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -172,7 +172,7 @@ Returns the hash value, as a string of eight bytes.
 =cut
 
 sub hash($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	return $self->{hash};
 }
 
@@ -183,7 +183,7 @@ Returns the hash value, as a string of twelve base 64 digits.
 =cut
 
 sub hash_base64($) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	return en_base64($self->{hash});
 }
 
@@ -194,7 +194,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	my($passphrase) = @_;
 	# Crypt::Blowfish only accepts key lengths 8 to 56 (inclusive).
 	# The Eggdrop version accepts lengths 1 upwards.  Bytes after 72
@@ -208,7 +208,7 @@ sub _hash_of($$) {
 }
 
 sub match($$) {
-	my __PACKAGE__ $self = shift;
+	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	my($passphrase) = @_;
 	return $passphrase ne "" &&
 		$self->_hash_of($passphrase) eq $self->{hash};
@@ -227,7 +227,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
