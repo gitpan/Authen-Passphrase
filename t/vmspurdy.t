@@ -104,7 +104,7 @@ foreach my $badpass ("", "a b", "1!", "oaoaoaoaoaoaoaoaoaoaoaoaoaoaoaoab") {
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) (\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) ([^ \n]+) ([^ \n]+) *//;
 	my($algorithm, $username, $salt, $hash_hex) = ($1, $2, $3, $4);
 	$ppr = Authen::Passphrase::VMSPurdy
 			->new(algorithm => $algorithm, username => $username,

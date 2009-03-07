@@ -41,7 +41,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 
@@ -61,7 +61,7 @@ returned from each call.
 
 {
 	my $singleton = bless({});
-	sub new($) { $singleton }
+	sub new { $singleton }
 }
 
 =item Authen::Passphrase::RejectAll->from_crypt(PASSWD)
@@ -72,7 +72,7 @@ one and twelve (inclusive) characters long and must not start with "B<$>".
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A[^\$].{0,11}\z/s) {
 		$passwd =~ /\A[!-#\%-9;-~][!-9;-~]{0,11}\z/
@@ -105,9 +105,9 @@ The C<match> method always returns false.
 
 =cut
 
-sub match($$) { 0 }
+sub match { 0 }
 
-sub as_crypt($) { "*" }
+sub as_crypt { "*" }
 
 =back
 
@@ -121,7 +121,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

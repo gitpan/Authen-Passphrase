@@ -68,7 +68,7 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(cost salt hash);
@@ -76,7 +76,7 @@ use fields qw(cost salt hash);
 my $base64_digits = "./0123456789ABCDEFGHIJKLMNOPQRST".
 		    "UVWXYZabcdefghijklmnopqrstuvwxyz";
 
-sub en_base64($) {
+sub _en_base64($) {
 	my($bytes) = @_;
 	my $nbytes = length($bytes);
 	my $npadbytes = 2 - ($nbytes + 2) % 3;
@@ -95,7 +95,7 @@ sub en_base64($) {
 	return $digits;
 }
 
-sub de_base64($) {
+sub _de_base64($) {
 	my($digits) = @_;
 	my $ndigits = length($digits);
 	my $npadbytes = 3 - ($ndigits + 3) % 4;
@@ -171,7 +171,7 @@ The cost and salt must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::PHPass $self = fields::new($class);
 	my $passphrase;
@@ -195,18 +195,18 @@ sub new($@) {
 		} elsif($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
+			$value =~ m#\A[\x00-\xff]{8}\z#
 				or croak "\"$value\" is not a valid salt";
 			$self->{salt} = "$value";
 		} elsif($attr eq "salt_random") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$self->{salt} = en_base64(rand_bits(48));
+			$self->{salt} = _en_base64(rand_bits(48));
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
+			$value =~ m#\A[\x00-\xff]{16}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_base64") {
@@ -215,7 +215,7 @@ sub new($@) {
 					defined($passphrase);
 			$value =~ m#\A[./0-9A-Za-z]{21}[./01]\z#
 				or croak "\"$value\" is not a valid hash";
-			$self->{hash} = de_base64($value);
+			$self->{hash} = _de_base64($value);
 		} elsif($attr eq "passphrase") {
 			croak "passphrase specified redundantly"
 				if exists($self->{hash}) ||
@@ -242,7 +242,7 @@ cannot appear in a crypt string.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$P\$/) {
 		$passwd =~ m#\A\$P\$([./0-9A-Za-z])([!-9;-~]{8})
@@ -273,7 +273,7 @@ be performed.
 
 =cut
 
-sub cost($) {
+sub cost {
 	my Authen::Passphrase::PHPass $self = shift;
 	return $self->{cost};
 }
@@ -285,7 +285,7 @@ be performed, expressed as a single base 64 digit.
 
 =cut
 
-sub cost_base64($) {
+sub cost_base64 {
 	my Authen::Passphrase::PHPass $self = shift;
 	return substr($base64_digits, $self->{cost}, 1);
 }
@@ -312,7 +312,7 @@ Returns the salt, as a string of eight bytes.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::PHPass $self = shift;
 	return $self->{salt};
 }
@@ -323,7 +323,7 @@ Returns the hash value, as a string of 16 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::PHPass $self = shift;
 	return $self->{hash};
 }
@@ -334,9 +334,9 @@ Returns the hash value, as a string of 22 base 64 digits.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::PHPass $self = shift;
-	return en_base64($self->{hash});
+	return _en_base64($self->{hash});
 }
 
 =item $ppr->match(PASSPHRASE)
@@ -349,7 +349,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::PHPass $self = shift;
 	my($passphrase) = @_;
 	my $ctx = Digest::MD5->new;
@@ -365,13 +365,13 @@ sub _hash_of($$) {
 	return $hash;
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::PHPass $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::PHPass $self = shift;
 	croak "can't put this salt into a crypt string"
 		if $self->{salt} =~ /[^!-9;-~]/;
@@ -391,7 +391,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

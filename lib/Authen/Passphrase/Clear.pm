@@ -36,7 +36,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 
@@ -53,7 +53,7 @@ passphrase in cleartext and accepts only that passphrase.
 
 =cut
 
-sub new($$) {
+sub new {
 	my($class, $passphrase) = @_;
 	$passphrase = "$passphrase";
 	return bless(\$passphrase, $class);
@@ -67,7 +67,7 @@ followed by the passphrase.
 
 =cut
 
-sub from_rfc2307($$) {
+sub from_rfc2307 {
 	my($class, $userpassword) = @_;
 	if($userpassword =~ /\A\{(?i:cleartext)\}/) {
 		$userpassword =~ /\A\{.*?\}([!-~]*)\z/
@@ -94,14 +94,14 @@ The C<passphrase> method trivially works.
 
 =cut
 
-sub match($$) {
+sub match {
 	my($self, $passphrase) = @_;
 	return $passphrase eq $$self;
 }
 
-sub passphrase($) { ${$_[0]} }
+sub passphrase { ${$_[0]} }
 
-sub as_rfc2307($) {
+sub as_rfc2307 {
 	my($self) = @_;
 	croak "can't put this passphrase into an RFC 2307 string"
 		if $$self =~ /[^!-~]/;
@@ -120,7 +120,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

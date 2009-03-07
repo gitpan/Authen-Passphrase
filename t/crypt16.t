@@ -46,7 +46,7 @@ ok $ppr->match("wibblewobble");
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) *//;
 	my($salt, $hash) = ($1, $2);
 	$ppr = Authen::Passphrase::Crypt16
 			->new(salt_base64 => $salt, hash_base64 => $hash);

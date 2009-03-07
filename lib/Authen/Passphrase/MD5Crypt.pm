@@ -85,7 +85,7 @@ use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash_base64);
@@ -128,7 +128,7 @@ The salt must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::MD5Crypt $self = fields::new($class);
 	my $passphrase;
@@ -138,7 +138,7 @@ sub new($@) {
 		if($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$value =~ m#\A[\x{0}-\x{ff}]*\z#
+			$value =~ m#\A[\x00-\xff]*\z#
 				or croak "not a valid salt";
 			$self->{salt} = "$value";
 		} elsif($attr eq "salt_random") {
@@ -183,7 +183,7 @@ or any character that cannot appear in a crypt string.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$1\$/) {
 		$passwd =~ m:\A\$1\$([!-#%-9;-~]{0,8})\$([./0-9A-Za-z]{22})\z:
@@ -211,7 +211,7 @@ Returns the salt, in raw form.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	return $self->{salt};
 }
@@ -222,7 +222,7 @@ Returns the hash value, as a string of 22 base 64 digits.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	return $self->{hash_base64};
 }
@@ -240,7 +240,7 @@ bytes, and it cannot contain any NUL or "B<$>" characters.
 
 =cut
 
-sub _hash_base64_of($$) {
+sub _hash_base64_of {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	my($passphrase) = @_;
 	die "can't use a crypt-incompatible salt yet ".
@@ -252,13 +252,13 @@ sub _hash_base64_of($$) {
 	return $hash;
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_base64_of($passphrase) eq $self->{hash_base64};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::MD5Crypt $self = shift;
 	croak "can't put this salt into a crypt string"
 		if $self->{salt} =~ /[^\!-\#\%-9\;-\~]/ ||
@@ -279,7 +279,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

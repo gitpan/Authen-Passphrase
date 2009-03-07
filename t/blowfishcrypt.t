@@ -69,7 +69,7 @@ is $ppr->hash_base64, "QJjrUXrZskQrnTq0SOwFkM0sRsvuzqC";
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) (\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) ([^ \n]+) ([^ \n]+) *//;
 	my($knul, $cost, $salt_base64, $hash_base64) = ($1, $2, $3, $4);
 	$ppr = Authen::Passphrase::BlowfishCrypt
 			->new(key_nul => $knul, cost => $cost,

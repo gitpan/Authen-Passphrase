@@ -59,7 +59,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::Blowfish 2.00;
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -67,7 +67,7 @@ use fields qw(hash);
 my $b64_digits =
 	"./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-sub en_base64($) {
+sub _en_base64($) {
 	my($bytes) = @_;
 	my $digits = "";
 	foreach my $word (reverse unpack("N*", $bytes)) {
@@ -78,7 +78,7 @@ sub en_base64($) {
 	return $digits;
 }
 
-sub de_base64($) {
+sub _de_base64($) {
 	my($digits) = @_;
 	my @words;
 	while($digits =~ /(......)/sg) {
@@ -122,7 +122,7 @@ Either the hash or the passphrase must be given.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::EggdropBlowfish $self = fields::new($class);
 	my $passphrase;
@@ -143,7 +143,7 @@ sub new($@) {
 			$value =~ m#\A(?:[./0-9a-zA-Z]{5}[./01]){2}\z#
 				or croak "\"$value\" is not a valid ".
 						"base 64 hash";
-			$self->{hash} = de_base64($value);
+			$self->{hash} = _de_base64($value);
 		} elsif($attr eq "passphrase") {
 			croak "passphrase specified redundantly"
 				if exists($self->{hash}) ||
@@ -171,7 +171,7 @@ Returns the hash value, as a string of eight bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	return $self->{hash};
 }
@@ -182,9 +182,9 @@ Returns the hash value, as a string of twelve base 64 digits.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::EggdropBlowfish $self = shift;
-	return en_base64($self->{hash});
+	return _en_base64($self->{hash});
 }
 
 =item $ppr->match(PASSPHRASE)
@@ -193,7 +193,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	my($passphrase) = @_;
 	# Crypt::Blowfish only accepts key lengths 8 to 56 (inclusive).
@@ -207,7 +207,7 @@ sub _hash_of($$) {
 	return $cipher->encrypt("\xde\xad\xd0\x61\x23\xf6\xb0\x95");
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::EggdropBlowfish $self = shift;
 	my($passphrase) = @_;
 	return $passphrase ne "" &&
@@ -227,7 +227,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

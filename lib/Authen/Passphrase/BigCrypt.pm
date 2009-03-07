@@ -71,10 +71,10 @@ use strict;
 use Authen::Passphrase 0.003;
 use Authen::Passphrase::DESCrypt;
 use Carp qw(croak);
-use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
+use Crypt::UnixCrypt_XS 0.08 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 
@@ -123,7 +123,7 @@ the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my $salt;
 	my @hashes;
@@ -153,7 +153,7 @@ sub new($@) {
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
 				if @hashes || defined($passphrase);
-			$value =~ m#\A(?:[\x{0}-\x{ff}]{8})+\z#
+			$value =~ m#\A(?:[\x00-\xff]{8})+\z#
 				or croak "not a valid bigcrypt hash";
 			push @hashes, $1 while $value =~ /(.{8})/sg;
 		} elsif($attr eq "hash_base64") {
@@ -212,7 +212,7 @@ Returns the salt for the first section, as a Perl integer.
 
 =cut
 
-sub salt($) { $_[0]->[0]->salt }
+sub salt { $_[0]->[0]->salt }
 
 =item $ppr->salt_base64_2
 
@@ -220,7 +220,7 @@ Returns the salt for the first section, as a string of two base 64 digits.
 
 =cut
 
-sub salt_base64_2($) { $_[0]->[0]->salt_base64_2 }
+sub salt_base64_2 { $_[0]->[0]->salt_base64_2 }
 
 =item $ppr->hash
 
@@ -228,7 +228,7 @@ Returns the hash value, as a string of bytes.
 
 =cut
 
-sub hash($) { join("", map { $_->hash } @{$_[0]}) }
+sub hash { join("", map { $_->hash } @{$_[0]}) }
 
 =item $ppr->hash_base64
 
@@ -238,7 +238,7 @@ than a base64 encoding of the combined hash.
 
 =cut
 
-sub hash_base64($) { join("", map { $_->hash_base64 } @{$_[0]}) }
+sub hash_base64 { join("", map { $_->hash_base64 } @{$_[0]}) }
 
 =item $ppr->sections
 
@@ -247,7 +247,7 @@ passphrase recognisers for the sections of the passphrase.
 
 =cut
 
-sub sections($) { [ @{$_[0]} ] }
+sub sections { [ @{$_[0]} ] }
 
 =item $ppr->match(PASSPHRASE)
 
@@ -255,7 +255,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::BigCrypt $self = shift;
 	my($passphrase) = @_;
 	my $nsegs = $passphrase eq "" ? 1 : ((length($passphrase) + 7) >> 3);
@@ -280,7 +280,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

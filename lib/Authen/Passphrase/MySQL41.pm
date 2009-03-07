@@ -47,7 +47,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::SHA1 qw(sha1);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -81,7 +81,7 @@ Either the hash or the passphrase must be given.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::MySQL41 $self = fields::new($class);
 	my $passphrase;
@@ -129,7 +129,7 @@ Returns the hash value, as a string of 20 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::MySQL41 $self = shift;
 	return $self->{hash};
 }
@@ -140,7 +140,7 @@ Returns the hash value, as a string of 40 uppercase hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::MySQL41 $self = shift;
 	return uc(unpack("H*", $self->{hash}));
 }
@@ -151,13 +151,13 @@ This method is part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::MySQL41 $self = shift;
 	my($passphrase) = @_;
 	return sha1(sha1($passphrase));
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::MySQL41 $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
@@ -176,7 +176,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

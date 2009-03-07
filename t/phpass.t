@@ -69,7 +69,7 @@ is $ppr->hash_base64, "MeOtoCi6dkB5NlSyY.wFQ.";
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) ([^ \n]+) *//;
 	my($cost_base64, $salt, $hash_base64) = ($1, $2, $3, $4);
 	$ppr = Authen::Passphrase::PHPass
 			->new(cost_base64 => $cost_base64,

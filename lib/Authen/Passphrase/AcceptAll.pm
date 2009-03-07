@@ -42,7 +42,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 
@@ -62,7 +62,7 @@ returned from each call.
 
 {
 	my $singleton = bless({});
-	sub new($) { $singleton }
+	sub new { $singleton }
 }
 
 =item Authen::Passphrase::AcceptAll->from_crypt("")
@@ -72,7 +72,7 @@ returned from each call.  The argument must be the empty string.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	return $class->new if $passwd eq "";
 	return $class->SUPER::from_crypt($passwd);
@@ -105,11 +105,11 @@ passphrases).
 
 =cut
 
-sub match($$) { 1 }
+sub match { 1 }
 
-sub passphrase($$) { "" }
+sub passphrase { "" }
 
-sub as_crypt($) { "" }
+sub as_crypt { "" }
 
 =back
 
@@ -123,7 +123,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

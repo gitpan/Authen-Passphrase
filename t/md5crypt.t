@@ -30,7 +30,7 @@ is $ppr->hash_base64, "2vsEqBwwsrvUdUYK40Dtm/";
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) *//;
 	my($salt, $hash) = ($1, $2);
 	$ppr = Authen::Passphrase::MD5Crypt
 			->new(salt => $salt, hash_base64 => $hash);

@@ -119,7 +119,7 @@ use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
-use Crypt::UnixCrypt_XS 0.05 qw(
+use Crypt::UnixCrypt_XS 0.08 qw(
 	fold_password crypt_rounds
 	base64_to_block block_to_base64
 	base64_to_int24 int24_to_base64
@@ -127,7 +127,7 @@ use Crypt::UnixCrypt_XS 0.05 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(fold initial nrounds salt hash);
@@ -203,7 +203,7 @@ parameters default to those used in the original DES-based crypt().
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::DESCrypt $self = fields::new($class);
 	my $passphrase;
@@ -217,7 +217,7 @@ sub new($@) {
 		} elsif($attr eq "initial") {
 			croak "initial block specified redundantly"
 				if exists $self->{initial};
-			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
+			$value =~ m#\A[\x00-\xff]{8}\z#
 				or croak "not a valid raw block";
 			$self->{initial} = "$value";
 		} elsif($attr eq "initial_base64") {
@@ -264,7 +264,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
+			$value =~ m#\A[\x00-\xff]{8}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_base64") {
@@ -310,7 +310,7 @@ Long passphrases are folded, and the initial block is all bits zero.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A[^\$].{12}\z/s) {
 		$passwd =~ m#\A([./0-9A-Za-z]{2})([./0-9A-Za-z]{11})\z#
@@ -344,7 +344,7 @@ Returns a boolean indicating whether passphrase folding is used.
 
 =cut
 
-sub fold($) {
+sub fold {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return $self->{fold};
 }
@@ -355,7 +355,7 @@ Returns the initial block, as a string of eight bytes.
 
 =cut
 
-sub initial($) {
+sub initial {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return $self->{initial};
 }
@@ -366,7 +366,7 @@ Returns the initial block, as a string of eleven base 64 digits.
 
 =cut
 
-sub initial_base64($) {
+sub initial_base64 {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return block_to_base64($self->{initial});
 }
@@ -377,7 +377,7 @@ Returns the number of encryption rounds, as a Perl integer.
 
 =cut
 
-sub nrounds($) {
+sub nrounds {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return $self->{nrounds};
 }
@@ -389,7 +389,7 @@ Returns the number of encryption rounds, as a string of four base
 
 =cut
 
-sub nrounds_base64_4($) {
+sub nrounds_base64_4 {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return int24_to_base64($self->{nrounds});
 }
@@ -400,7 +400,7 @@ Returns the salt, as a Perl integer.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return $self->{salt};
 }
@@ -412,7 +412,7 @@ doesn't fit into two digits.
 
 =cut
 
-sub salt_base64_2($) {
+sub salt_base64_2 {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	my $salt = $self->{salt};
 	croak "salt $salt doesn't fit into two digits" if $salt >= 4096;
@@ -425,7 +425,7 @@ Returns the salt, as a string of four base 64 digits.
 
 =cut
 
-sub salt_base64_4($) {
+sub salt_base64_4 {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return int24_to_base64($self->{salt});
 }
@@ -436,7 +436,7 @@ Returns the hash value, as a string of eight bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return $self->{hash};
 }
@@ -447,7 +447,7 @@ Returns the hash value, as a string of eleven base 64 digits.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	return block_to_base64($self->{hash});
 }
@@ -464,7 +464,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	my($passphrase) = @_;
 	$passphrase = fold_password($passphrase) if $self->{fold};
@@ -472,13 +472,13 @@ sub _hash_of($$) {
 			    $self->{initial});
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::DESCrypt $self = shift;
 	if(!$self->{fold} && $self->{initial} eq "\0\0\0\0\0\0\0\0" &&
 			$self->{nrounds} == 25 && $self->{salt} < 4096) {
@@ -504,7 +504,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

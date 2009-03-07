@@ -1,4 +1,5 @@
 .cvsignore
+Build.PL
 Changes
 MANIFEST
 META.yml
@@ -40,8 +41,11 @@ t/mysql41.t
 t/netscapemail.t
 t/nthash.t
 t/phpass.t
+t/pod_cvg.t
+t/pod_syn.t
 t/rejectall.t
 t/smd5.t
 t/ssha.t
 t/traddescrypt.t
 t/vmspurdy.t
+SIGNATURE    Added here by Module::Build

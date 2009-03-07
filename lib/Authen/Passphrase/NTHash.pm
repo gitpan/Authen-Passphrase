@@ -51,7 +51,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -85,7 +85,7 @@ Either the hash or the passphrase must be given.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::NTHash $self = fields::new($class);
 	my $passphrase;
@@ -96,7 +96,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
+			$value =~ m#\A[\x00-\xff]{16}\z#
 				or croak "not a valid MD4 hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
@@ -131,7 +131,7 @@ consist of "B<$NT$>" followed by the hash in lowercase hexadecimal.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$3\$/) {
 		$passwd =~ m#\A\$3\$\$([0-9a-f]{32})\z#
@@ -155,7 +155,7 @@ is ignored.  In the second form, the string must consist of "B<{CRYPT}>"
 
 =cut
 
-sub from_rfc2307($$) {
+sub from_rfc2307 {
 	my($class, $userpassword) = @_;
 	if($userpassword =~ /\A\{(?i:msnt)\}/) {
 		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})\z/
@@ -177,7 +177,7 @@ Returns the hash value, as a string of 16 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::NTHash $self = shift;
 	return $self->{hash};
 }
@@ -188,7 +188,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::NTHash $self = shift;
 	return unpack("H*", $self->{hash});
 }
@@ -203,7 +203,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::NTHash $self = shift;
 	my($passphrase) = @_;
 	$passphrase = substr($passphrase, 0, 128);
@@ -211,18 +211,18 @@ sub _hash_of($$) {
 	return md4($passphrase);
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::NTHash $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::NTHash $self = shift;
 	return "\$3\$\$".$self->hash_hex;
 }
 
-sub as_rfc2307($) {
+sub as_rfc2307 {
 	my Authen::Passphrase::NTHash $self = shift;
 	return "{MSNT}".$self->hash_hex;
 }
@@ -240,7 +240,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -61,7 +61,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::DES;
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(hash);
@@ -95,7 +95,7 @@ Either the hash or the passphrase must be given.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::LANManagerHalf $self = fields::new($class);
 	my $passphrase;
@@ -106,7 +106,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
+			$value =~ m#\A[\x00-\xff]{8}\z#
 				or croak "not a valid LAN Manager half hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
@@ -142,7 +142,7 @@ the hash in lowercase hexadecimal.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$LM\$/) {
 		$passwd =~ m#\A\$LM\$([0-9a-f]{16})\z#
@@ -170,7 +170,7 @@ Returns the hash value, as a string of 8 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return $self->{hash};
 }
@@ -181,7 +181,7 @@ Returns the hash value, as a string of 16 hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return unpack("H*", $self->{hash});
 }
@@ -196,13 +196,13 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _passphrase_acceptable($$) {
+sub _passphrase_acceptable {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
-	return $passphrase =~ /\A[\x{0}-\x{ff}]{0,7}\z/;
+	return $passphrase =~ /\A[\x00-\xff]{0,7}\z/;
 }
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
 	$passphrase = uc($passphrase);
@@ -216,14 +216,14 @@ sub _hash_of($$) {
 	return Crypt::DES->new($key)->encrypt("KGS!\@#\$%");
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	my($passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::LANManagerHalf $self = shift;
 	return "\$LM\$".$self->hash_hex;
 }
@@ -242,7 +242,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

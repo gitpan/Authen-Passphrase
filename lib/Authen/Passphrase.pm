@@ -87,9 +87,9 @@ use strict;
 
 use Carp qw(croak);
 use MIME::Base64 2.21 qw(decode_base64);
-use Module::Runtime qw(use_module);
+use Module::Runtime 0.005 qw(use_module);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 =head1 CONSTRUCTORS
 
@@ -221,23 +221,23 @@ are regarded as invalid encodings.
 
 my %crypt_scheme_handler = (
 	"1"    => [ "Authen::Passphrase::MD5Crypt", 0.003 ],
-	"2"    => [ "Authen::Passphrase::BlowfishCrypt", 0.003 ],
-	"2a"   => [ "Authen::Passphrase::BlowfishCrypt", 0.003 ],
+	"2"    => [ "Authen::Passphrase::BlowfishCrypt", 0.006 ],
+	"2a"   => [ "Authen::Passphrase::BlowfishCrypt", 0.006 ],
 	"3"    => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"IPB2" => sub($) { croak '$IPB2$ is unimplemented' },
 	"K4"   => sub($) { croak '$K4$ is unimplemented' },
 	"LM"   => [ "Authen::Passphrase::LANManagerHalf", 0.003 ],
 	"NT"   => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"P"    => [ "Authen::Passphrase::PHPass", 0.003 ],
-	"VMS1" => [ "Authen::Passphrase::VMSPurdy", 0.003 ],
-	"VMS2" => [ "Authen::Passphrase::VMSPurdy", 0.003 ],
-	"VMS3" => [ "Authen::Passphrase::VMSPurdy", 0.003 ],
+	"VMS1" => [ "Authen::Passphrase::VMSPurdy", 0.006 ],
+	"VMS2" => [ "Authen::Passphrase::VMSPurdy", 0.006 ],
+	"VMS3" => [ "Authen::Passphrase::VMSPurdy", 0.006 ],
 	"af"   => sub($) { croak '$af$ is unimplemented' },
 	"apr1" => sub($) { croak '$apr1$ is unimplemented' },
 	"krb5" => sub($) { croak '$krb5$ is unimplemented' },
 );
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	croak "crypt string \"$passwd\" not supported for $class"
 		unless $class eq __PACKAGE__;
@@ -248,7 +248,7 @@ sub from_crypt($$) {
 		croak "unrecognised crypt scheme \$$scheme\$"
 			unless defined $handler;
 	} elsif($passwd =~ m#\A(?:[^\$].{12}|_.{19})\z#s) {
-		$handler = [ "Authen::Passphrase::DESCrypt", 0.003 ];
+		$handler = [ "Authen::Passphrase::DESCrypt", 0.006 ];
 	} elsif($passwd eq "") {
 		$handler = [ "Authen::Passphrase::AcceptAll", 0.003 ];
 	} elsif($passwd =~ /\A[^\$].{0,11}\z/s) {
@@ -383,20 +383,20 @@ my %rfc2307_scheme_handler = (
 	"KERBEROS"   => sub($) { croak "{KERBEROS} is a placeholder" },
 	"LANM"       => [ "Authen::Passphrase::LANManager", 0.003 ],
 	"LANMAN"     => [ "Authen::Passphrase::LANManager", 0.003 ],
-	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
-	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
+	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
 	"MSNT"       => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"NS-MTA-MD5" => [ "Authen::Passphrase::NetscapeMail", 0.003 ],
-	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
+	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
 	"SASL"       => sub($) { croak "{SASL} is a placeholder" },
-	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
-	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
-	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.003 ],
+	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
 	"UNIX"       => sub($) { croak "{UNIX} is a placeholder" },
 	# "WM-CRY" is handled specially
 );
 
-sub from_rfc2307($$) {
+sub from_rfc2307 {
 	my($class, $userpassword) = @_;
 	return $class->from_crypt($1)
 		if $userpassword =~ m#\A\{(?i:crypt|wm-cry)\}(.*)\z#s;
@@ -446,7 +446,7 @@ represented in this form.
 
 =cut
 
-sub as_rfc2307($) { "{CRYPT}".$_[0]->as_crypt }
+sub as_rfc2307 { "{CRYPT}".$_[0]->as_crypt }
 
 =back
 
@@ -483,7 +483,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

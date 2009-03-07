@@ -1,6 +1,44 @@
+version 0.006; 2009-03-07
+
+  * bugfix: in A::P::SaltedDigest, use "[0-9]" instead of "\d" in regexps
+    where only ASCII digits are desired
+
+  * bugfix: require bugfixed versions of Authen::DecHpwd,
+    Crypt::Eksblowfish::Bcrypt, and Crypt::UnixCrypt_XS (for UTF8 scalar
+    handling)
+
+  * bugfix: require bugfixed version of Authen::DecHpwd (for not crashing)
+
+  * bugfix: require bugfixed version of Module::Runtime (for $SIG{__DIE__}
+    handling)
+
+  * avoid "\x{}" in regexp character classes, for compatibility with
+    perl v5.6
+
+  * in documentation for A::P::SaltedDigest, briefly discuss the new
+    generation of hash algorithms
+
+  * test POD syntax and coverage, and rename some internal functions to
+    satisfy the coverage test
+
+  * drop prototypes from method subs (where the prototypes have no effect)
+
+  * in tests, avoid unreliable "\S" regexp element
+
+  * build with Module::Build instead of ExtUtils::MakeMaker
+
+  * complete dependency list
+
+  * more precise Crypt::Eksblowfish::Bcrypt dependency instead of
+    Crypt::Eksblowfish dependency
+
+  * include signature in distribution
+
+  * in documentation, separate "license" section from "copyright" section
+
 version 0.005; 2007-01-21
 
-  * bugfix: avoid "my __PACKAGE__", for compatibility with perl v5.6
+  * avoid "my __PACKAGE__", for compatibility with perl v5.6
 
   * point to Crypt::SaltedHash from documentation for A::P::SaltedDigest
 

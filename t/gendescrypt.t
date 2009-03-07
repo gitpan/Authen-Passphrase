@@ -5,7 +5,7 @@ BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) (\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) ([^ \n]+) ([^ \n]+) *//;
 	my($nrounds, $salt, $initial, $hash) = ($1, $2, $3, $4);
 	my $ppr = Authen::Passphrase::DESCrypt
 			->new(fold => 1, initial_base64 => $initial,

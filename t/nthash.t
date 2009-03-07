@@ -32,7 +32,7 @@ my %pprs;
 my $i = 0;
 while(<DATA>) {
 	chomp;
-	s/(\S+) *//;
+	s/([^ \n]+) *//;
 	my $hash_hex = $1;
 	my $hash = pack("H*", $hash_hex);
 	$ppr = Authen::Passphrase::NTHash

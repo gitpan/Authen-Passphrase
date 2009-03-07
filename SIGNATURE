@@ -1,0 +1,73 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.55.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 9f4a64d9e7786d6f683c250a2138566417fda453 .cvsignore
+SHA1 896db9c43146841cb7602cced288addc97e073be Build.PL
+SHA1 e66d67f9d9328e4fb4fe0e3fd9190c916c52bed9 Changes
+SHA1 57819ff9232fde9c8f3425b52dc5409ec40c0e13 MANIFEST
+SHA1 fbb2c70e4007fcb5e6ead86cd806da48c2707ebe META.yml
+SHA1 f39315b8e83202006e8a916c6a58725d104f75ec Makefile.PL
+SHA1 9677d11f64aa4dc10154197581bafd5b367946c7 README
+SHA1 937f2dbf930447440695c27b834b4086358131af lib/Authen/Passphrase.pm
+SHA1 d8c8dca3cbcf94a2fba56f34c74d9329e340816a lib/Authen/Passphrase/AcceptAll.pm
+SHA1 bd9c3e09987f8dc9773b07f8c11b3c66701a6f4c lib/Authen/Passphrase/BigCrypt.pm
+SHA1 ebdd44e0475352bcfa0b32a8636a54f9f4cc81db lib/Authen/Passphrase/BlowfishCrypt.pm
+SHA1 d1007138d6baa0ce60247ba24474e5bf591eb2f5 lib/Authen/Passphrase/Clear.pm
+SHA1 3059bf4db8ddd54ab5d88646ade20ebb4b14194f lib/Authen/Passphrase/Crypt16.pm
+SHA1 0b0d3e2ef45999c60b50e7eeef13e3cb4e7f3292 lib/Authen/Passphrase/DESCrypt.pm
+SHA1 36cd19a485e14bdfb0b1eae3da130845578ce69f lib/Authen/Passphrase/EggdropBlowfish.pm
+SHA1 bd2adcdb1f36aec97590c0edce2b705d9f506713 lib/Authen/Passphrase/LANManager.pm
+SHA1 a2a0701ba49dc5d7e7bdd322e40aaa625d650600 lib/Authen/Passphrase/LANManagerHalf.pm
+SHA1 cca7f3d75584393422bde54843cbcdb3e5fb3fae lib/Authen/Passphrase/MD5Crypt.pm
+SHA1 8b06d373f20b0158a23cacefdb6d2ecd8453cb55 lib/Authen/Passphrase/MySQL323.pm
+SHA1 086fd0125996f006d0e096da343e3018b48b56d2 lib/Authen/Passphrase/MySQL41.pm
+SHA1 4718041fc556251951d9621f72329053d5d7729c lib/Authen/Passphrase/NTHash.pm
+SHA1 42f8ec985611f87ec05fdd0f23a7f6a35f710de3 lib/Authen/Passphrase/NetscapeMail.pm
+SHA1 98802231671712240dac8a4a32f2cfd7ec03fc67 lib/Authen/Passphrase/PHPass.pm
+SHA1 f5a5f374acc924234f6ac29a3f05575c62f85e7a lib/Authen/Passphrase/RejectAll.pm
+SHA1 5685d72f8a63b64f585af7da9391a5d1978d6e45 lib/Authen/Passphrase/SaltedDigest.pm
+SHA1 d06ad07201151d94ad2f638e9e12f63b21bb23d5 lib/Authen/Passphrase/VMSPurdy.pm
+SHA1 df301e86bf5f705e8400f506fe97616d7bd33b3d t/acceptall.t
+SHA1 84286627d33fd39ec927d3b44c7fd651a6eacce8 t/bigcrypt.t
+SHA1 5d439d0a48f93b9287e03dc9e2c966faf6c87344 t/blowfishcrypt.t
+SHA1 06a33b31863d188857f29817fc12e6d5f565b092 t/clear.t
+SHA1 806abc2605de060ff20d0cc2416dc9c1a6688ee9 t/crypt16.t
+SHA1 2fd7fb851f89bf25676d880bfa3ec15277bc5895 t/eggdropblowfish.t
+SHA1 a91904ea02cc49984f811249e9b97a5a5a6fb541 t/extdescrypt.t
+SHA1 c8bc062b953b9f543efc4371bf6cd50b737e7b8f t/gendescrypt.t
+SHA1 20e146d9f938af7f3727668f8e5598f11b3c0bb1 t/intdescrypt.t
+SHA1 539dbee9955695b1592ea8a4024a31b0d66f2008 t/lanman.t
+SHA1 f242d99380cb82f688fd5bbcabf85b02e0cd5a5f t/lanmanhalf.t
+SHA1 f91d9bbb8a5448888213b78cbb50c2da7bbf1aaf t/md5crypt.t
+SHA1 82ec239808a21dd2f1727f47be449d8c5c778969 t/mysql323.t
+SHA1 82ecab9471c6cc3f257ccf2b166068587bc8a3a5 t/mysql41.t
+SHA1 5f153b3a68a53e2fb6ad72a6ffd05ea2f42a3dd9 t/netscapemail.t
+SHA1 4934ea1fffa362c2b1c68db78cb9a4f7cf9c224f t/nthash.t
+SHA1 2453f0b00f64349b879d5e8ccad34990c3b7925a t/phpass.t
+SHA1 0e141eecf3ca4903ef38d9413b5403a9ddb0392f t/pod_cvg.t
+SHA1 74a957cd8b93f25672ecc6aa578a671d084dd343 t/pod_syn.t
+SHA1 f961c0c4b2b34ecfc813067e75602885e3e07c6d t/rejectall.t
+SHA1 cfdbfb5cd8b65a8230a08ae914acec3ea26c52d6 t/smd5.t
+SHA1 086cf28ee4f5ed3324c9f624d0c82328c48600ab t/ssha.t
+SHA1 85fd77484de9f9f9e628738739a8bdd1a93cc24c t/traddescrypt.t
+SHA1 f889fcef78c45d887edd393e17acabe406cd2faa t/vmspurdy.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkmyVzkACgkQOV9mt2VyAVHaoQCgjKyD0s0sZdoDYlvjWoc+4Nv7
+J38An2Lfoq3DNU9a09FmuG4W5CA3vQhk
+=CsnD
+-----END PGP SIGNATURE-----

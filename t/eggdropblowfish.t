@@ -26,7 +26,7 @@ my %pprs;
 my $i = 0;
 while(<DATA>) {
 	chomp;
-	s/(\S+) *//;
+	s/([^ \n]+) *//;
 	my $hash_base64 = $1;
 	$ppr = Authen::Passphrase::EggdropBlowfish
 		->new(hash_base64 => $hash_base64);

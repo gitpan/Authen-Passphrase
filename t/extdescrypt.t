@@ -13,7 +13,7 @@ is $ppr->hash_base64, "P7NemfyIO3Y";
 my %pprs;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) ([^ \n]+) *//;
 	my($nrounds, $salt, $hash) = ($1, $2, $3);
 	$ppr = Authen::Passphrase::DESCrypt
 			->new(fold => 1, nrounds_base64 => $nrounds,

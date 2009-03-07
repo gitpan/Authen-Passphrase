@@ -48,8 +48,10 @@ The strength depends entirely on the choice of digest algorithm, so
 choose according to the level of security required.  SHA-1 is suitable for
 most applications, but recent work has revealed weaknesses in the basic
 structure of MD5, SHA-1, SHA-256, and all similar digest algorithms.
-A new generation of digest algorithms will probably emerge sometime
-around 2008.
+A new generation of digest algorithms emerged in 2008, centred around
+NIST's competition to design SHA-3.  Once these algorithms have been
+subjected to sufficient cryptanalysis, the survivors will be preferred
+over SHA-1 and its generation.
 
 Digest algorithms are generally designed to be as efficient to compute
 as possible for their level of cryptographic strength.  An unbroken
@@ -75,10 +77,10 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest 1.00;
 use MIME::Base64 2.21 qw(encode_base64 decode_base64);
-use Module::Runtime 0.001 qw(is_valid_module_name use_module);
+use Module::Runtime 0.005 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt hash);
@@ -155,7 +157,7 @@ The digest algorithm must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::SaltedDigest $self = fields::new($class);
 	my $passphrase;
@@ -169,7 +171,7 @@ sub new($@) {
 		} elsif($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$value =~ m#\A[\x{0}-\x{ff}]*\z#
+			$value =~ m#\A[\x00-\xff]*\z#
 				or croak "\"$value\" is not a valid salt";
 			$self->{salt} = "$value";
 		} elsif($attr eq "salt_hex") {
@@ -188,7 +190,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]*\z#
+			$value =~ m#\A[\x00-\xff]*\z#
 				or croak "\"$value\" is not a valid hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
@@ -245,7 +247,7 @@ my %rfc2307_scheme_meaning = (
 	"SSHA" => ["SHA-1", 20, 1],
 );
 
-sub from_rfc2307($$) {
+sub from_rfc2307 {
 	my($class, $userpassword) = @_;
 	return $class->SUPER::from_rfc2307($userpassword)
 		unless $userpassword =~ /\A\{([-0-9A-Za-z]+)\}/;
@@ -283,7 +285,7 @@ constructor.
 
 =cut
 
-sub algorithm($) {
+sub algorithm {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	return $self->{algorithm};
 }
@@ -294,7 +296,7 @@ Returns the salt, in raw form.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	return $self->{salt};
 }
@@ -305,7 +307,7 @@ Returns the salt, as a string of hexadecimal digits.
 
 =cut
 
-sub salt_hex($) {
+sub salt_hex {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	return unpack("H*", $self->{salt});
 }
@@ -316,7 +318,7 @@ Returns the hash value, in raw form.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	return $self->{hash};
 }
@@ -327,7 +329,7 @@ Returns the hash value, as a string of hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	return unpack("H*", $self->{hash});
 }
@@ -342,7 +344,7 @@ can be represented in RFC 2307 form.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	my($passphrase) = @_;
 	my $alg = $self->{algorithm};
@@ -350,7 +352,7 @@ sub _hash_of($$) {
 	if(is_string($alg)) {
 		if($alg =~ /::/) {
 			$alg =~ /\A(?:::)?([\w:]+)
-				   (-(\d[\d_]*(?:\._*\d[\d_]*)?)?)?\z/x
+				   (-([0-9][0-9_]*(?:\._*[0-9][0-9_]*)?)?)?\z/x
 				or croak "module spec `$alg' not understood";
 			my($pkgname, $load_p, $modver) = ($1, $2, $3);
 			croak "bad package name `$pkgname'"
@@ -377,7 +379,7 @@ sub _hash_of($$) {
 	return $ctx->digest;
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
@@ -403,7 +405,7 @@ my %rfc2307_scheme_for_package_name = (
 	"RIPEMD160" => "RMD160",
 );
 
-sub as_rfc2307($) {
+sub as_rfc2307 {
 	my Authen::Passphrase::SaltedDigest $self = shift;
 	my $alg = $self->{algorithm};
 	my $scheme;
@@ -434,7 +436,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

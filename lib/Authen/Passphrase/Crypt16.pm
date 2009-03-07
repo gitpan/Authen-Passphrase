@@ -68,10 +68,10 @@ use strict;
 use Authen::Passphrase 0.003;
 use Authen::Passphrase::DESCrypt;
 use Carp qw(croak);
-use Crypt::UnixCrypt_XS 0.05 qw(base64_to_block base64_to_int12);
+use Crypt::UnixCrypt_XS 0.08 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(first_half second_half);
@@ -120,7 +120,7 @@ The salt must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::Crypt16 $self = fields::new($class);
 	my $salt;
@@ -151,7 +151,7 @@ sub new($@) {
 		} elsif($attr eq "hash") {
 			croak "hash specified redundantly"
 				if defined($hash) || defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
+			$value =~ m#\A[\x00-\xff]{16}\z#
 				or croak "not a valid crypt16 hash";
 			$hash = $value;
 		} elsif($attr eq "hash_base64") {
@@ -208,7 +208,7 @@ Returns the salt, as a Perl integer.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->salt;
 }
@@ -219,7 +219,7 @@ Returns the salt, as a string of two base 64 digits.
 
 =cut
 
-sub salt_base64_2($) {
+sub salt_base64_2 {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->salt_base64_2;
 }
@@ -230,7 +230,7 @@ Returns the hash value, as a string of 16 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->hash.$self->{second_half}->hash;
 }
@@ -243,7 +243,7 @@ a base64 encoding of the combined hash.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half}->hash_base64.
 		$self->{second_half}->hash_base64;
@@ -256,7 +256,7 @@ C<Authen::Passphrase::DESCrypt> passphrase recogniser.
 
 =cut
 
-sub first_half($) {
+sub first_half {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{first_half};
 }
@@ -268,7 +268,7 @@ C<Authen::Passphrase::DESCrypt> passphrase recogniser.
 
 =cut
 
-sub second_half($) {
+sub second_half {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	return $self->{second_half};
 }
@@ -279,7 +279,7 @@ This method is part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::Crypt16 $self = shift;
 	my($passphrase) = @_;
 	return $self->{first_half}->match(substr($passphrase, 0, 8)) &&
@@ -300,7 +300,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

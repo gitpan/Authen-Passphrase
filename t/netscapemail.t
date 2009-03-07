@@ -30,7 +30,7 @@ my %pprs;
 my $i = 0;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) *//;
 	my($salt, $hash_hex) = ($1, $2);
 	$ppr = Authen::Passphrase::NetscapeMail
 			->new(salt => $salt,

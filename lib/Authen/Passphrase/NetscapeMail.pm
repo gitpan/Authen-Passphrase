@@ -54,7 +54,7 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(salt hash);
@@ -100,7 +100,7 @@ The salt must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::NetscapeMail $self = fields::new($class);
 	my $passphrase;
@@ -110,7 +110,7 @@ sub new($@) {
 		if($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$value =~ m#\A[\x{0}-\x{ff}]{32}\z#
+			$value =~ m#\A[\x00-\xff]{32}\z#
 				or croak "not a valid salt";
 			$self->{salt} = "$value";
 		} elsif($attr eq "salt_random") {
@@ -121,7 +121,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
+			$value =~ m#\A[\x00-\xff]{16}\z#
 				or croak "not a valid MD5 hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
@@ -157,7 +157,7 @@ contain any character that cannot appear in an RFC 2307 string.
 
 =cut
 
-sub from_rfc2307($$) {
+sub from_rfc2307 {
 	my($class, $userpassword) = @_;
 	if($userpassword =~ /\A\{(?i:ns-mta-md5)\}/) {
 		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})([!-~]{32})\z/
@@ -179,7 +179,7 @@ Returns the salt value, as a string of 32 bytes.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	return $self->{salt};
 }
@@ -190,7 +190,7 @@ Returns the hash value, as a string of 16 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	return $self->{hash};
 }
@@ -201,7 +201,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	return unpack("H*", $self->{hash});
 }
@@ -214,7 +214,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	my($passphrase) = @_;
 	my $ctx = Digest::MD5->new;
@@ -226,13 +226,13 @@ sub _hash_of($$) {
 	return $ctx->digest;
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_rfc2307($) {
+sub as_rfc2307 {
 	my Authen::Passphrase::NetscapeMail $self = shift;
 	croak "can't put this salt into an RFC 2307 string"
 		if $self->{salt} =~ /[^!-~]/;
@@ -252,7 +252,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

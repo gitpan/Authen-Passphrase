@@ -35,7 +35,7 @@ my %pprs;
 my $i = 0;
 while(<DATA>) {
 	chomp;
-	s/(\S+) (\S+) *//;
+	s/([^ \n]+) ([^ \n]+) *//;
 	my($salt_hex, $hash_hex) = ($1, $2);
 	my $salt = pack("H*", $salt_hex);
 	my $hash = pack("H*", $hash_hex);

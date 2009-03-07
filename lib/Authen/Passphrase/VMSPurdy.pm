@@ -77,12 +77,12 @@ package Authen::Passphrase::VMSPurdy;
 use warnings;
 use strict;
 
-use Authen::DecHpwd 2.0 qw(lgi_hpwd UAI_C_PURDY UAI_C_PURDY_V UAI_C_PURDY_S);
+use Authen::DecHpwd 2.003 qw(lgi_hpwd UAI_C_PURDY UAI_C_PURDY_V UAI_C_PURDY_S);
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(algorithm salt username hash);
@@ -147,7 +147,7 @@ passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::VMSPurdy $self = fields::new($class);
 	my $passphrase;
@@ -186,7 +186,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{8}\z#
+			$value =~ m#\A[\x00-\xff]{8}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_hex") {
@@ -236,7 +236,7 @@ my %decode_crypt_alg_num = (
 	"3" => "PURDY_S",
 );
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A\$VMS([123])\$/) {
 		my $alg = $1;
@@ -271,7 +271,7 @@ processing long strings).
 
 =cut
 
-sub algorithm($) {
+sub algorithm {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return $self->{algorithm};
 }
@@ -283,7 +283,7 @@ uppercase, which is the canonical form.
 
 =cut
 
-sub username($) {
+sub username {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return $self->{username};
 }
@@ -294,7 +294,7 @@ Returns the salt, as an integer.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return $self->{salt};
 }
@@ -308,7 +308,7 @@ byte.
 
 =cut
 
-sub salt_hex($) {
+sub salt_hex {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return sprintf("%02X%02X", $self->{salt} & 0xff, $self->{salt} >> 8);
 }
@@ -319,7 +319,7 @@ Returns the hash value, as a string of eight bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return $self->{hash};
 }
@@ -330,7 +330,7 @@ Returns the hash value, as a string of 16 uppercase hexadecimal digits.
 
 =cut
 
-sub hash_hex($) {
+sub hash_hex {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return uc(unpack("H*", $self->{hash}));
 }
@@ -345,7 +345,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _passphrase_acceptable($$) {
+sub _passphrase_acceptable {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	my($passphrase) = @_;
 	return $passphrase =~ /\A[_\$0-9A-Za-z]{1,32}\z/;
@@ -357,14 +357,14 @@ my %hpwd_alg_num = (
 	PURDY_S => UAI_C_PURDY_S,
 );
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	my($passphrase) = @_;
 	return lgi_hpwd($self->{username}, uc($passphrase),
 			$hpwd_alg_num{$self->{algorithm}}, $self->{salt});
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	my($passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
@@ -377,7 +377,7 @@ my %crypt_alg_num = (
 	PURDY_S => "3",
 );
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::VMSPurdy $self = shift;
 	return "\$VMS".$crypt_alg_num{$self->{algorithm}}."\$".
 		$self->salt_hex.$self->hash_hex.$self->{username};
@@ -396,7 +396,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

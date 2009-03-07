@@ -86,10 +86,10 @@ use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
-use Crypt::Eksblowfish::Bcrypt 0.000 qw(bcrypt_hash en_base64 de_base64);
+use Crypt::Eksblowfish::Bcrypt 0.005 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 use base qw(Authen::Passphrase);
 use fields qw(key_nul cost salt hash);
@@ -152,7 +152,7 @@ The cost and salt must be given, and either the hash or the passphrase.
 
 =cut
 
-sub new($@) {
+sub new {
 	my $class = shift;
 	my Authen::Passphrase::BlowfishCrypt $self = fields::new($class);
 	my $passphrase;
@@ -172,7 +172,7 @@ sub new($@) {
 		} elsif($attr eq "salt") {
 			croak "salt specified redundantly"
 				if exists $self->{salt};
-			$value =~ m#\A[\x{0}-\x{ff}]{16}\z#
+			$value =~ m#\A[\x00-\xff]{16}\z#
 				or croak "\"$value\" is not a valid raw salt";
 			$self->{salt} = "$value";
 		} elsif($attr eq "salt_base64") {
@@ -189,7 +189,7 @@ sub new($@) {
 			croak "hash specified redundantly"
 				if exists($self->{hash}) ||
 					defined($passphrase);
-			$value =~ m#\A[\x{0}-\x{ff}]{23}\z#
+			$value =~ m#\A[\x00-\xff]{23}\z#
 				or croak "not a valid raw hash";
 			$self->{hash} = "$value";
 		} elsif($attr eq "hash_base64") {
@@ -227,7 +227,7 @@ digits giving the salt, and finally 31 base 64 digits giving the hash.
 
 =cut
 
-sub from_crypt($$) {
+sub from_crypt {
 	my($class, $passwd) = @_;
 	if($passwd =~ /\A(\$2a?\$)/) {
 		$passwd =~ m#\A\$2(a?)\$([0-9]{2})\$
@@ -258,7 +258,7 @@ passphrase before using it as a key.
 
 =cut
 
-sub key_nul($) {
+sub key_nul {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{key_nul};
 }
@@ -270,7 +270,7 @@ be performed.
 
 =cut
 
-sub cost($) {
+sub cost {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{cost};
 }
@@ -289,7 +289,7 @@ Returns the salt, as a string of sixteen bytes.
 
 =cut
 
-sub salt($) {
+sub salt {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{salt};
 }
@@ -300,7 +300,7 @@ Returns the salt, as a string of 22 base 64 digits.
 
 =cut
 
-sub salt_base64($) {
+sub salt_base64 {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return en_base64($self->{salt});
 }
@@ -311,7 +311,7 @@ Returns the hash value, as a string of 23 bytes.
 
 =cut
 
-sub hash($) {
+sub hash {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return $self->{hash};
 }
@@ -322,7 +322,7 @@ Returns the hash value, as a string of 31 base 64 digits.
 
 =cut
 
-sub hash_base64($) {
+sub hash_base64 {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	return en_base64($self->{hash});
 }
@@ -337,7 +337,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 =cut
 
-sub _hash_of($$) {
+sub _hash_of {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	my($passphrase) = @_;
 	return bcrypt_hash({
@@ -347,13 +347,13 @@ sub _hash_of($$) {
 	}, $passphrase);
 }
 
-sub match($$) {
+sub match {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	my($passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
-sub as_crypt($) {
+sub as_crypt {
 	my Authen::Passphrase::BlowfishCrypt $self = shift;
 	croak "passphrase can't be expressed as a crypt string"
 		if $self->{cost} > 99;
@@ -374,7 +374,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
