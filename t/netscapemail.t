@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 67;
 
 BEGIN { use_ok "Authen::Passphrase::NetscapeMail"; }
@@ -51,6 +54,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 hlV8:`2Q4?@^If)5(cf4xbDKV#o\Sk(` d019c4507be8652975e62871acaa7b52

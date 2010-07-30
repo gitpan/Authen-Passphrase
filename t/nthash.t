@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 67;
 
 BEGIN { use_ok "Authen::Passphrase::NTHash"; }
@@ -53,6 +56,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 31d6cfe0d16ae931b73c59d7e0c089c0

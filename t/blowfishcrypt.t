@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 103;
 
 BEGIN { use_ok "Authen::Passphrase::BlowfishCrypt"; }
@@ -94,6 +97,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 0 6 Yn6x4nvPtEPkdmRQ74S1Q. ehVP/UL/xbYgKCilZtidy3nc5ttCeLa

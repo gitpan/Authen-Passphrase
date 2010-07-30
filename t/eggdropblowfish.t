@@ -1,4 +1,7 @@
-use Test::More tests => 48;
+use warnings;
+use strict;
+
+use Test::More tests => 84;
 
 BEGIN { use_ok "Authen::Passphrase::EggdropBlowfish"; }
 
@@ -40,13 +43,18 @@ while(<DATA>) {
 
 foreach my $rightphrase (sort keys %pprs) {
 	my $ppr = $pprs{$rightphrase};
+	ok !$ppr->match("");
 	foreach my $passphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 v.gq8.qm3rM1 0
 V6ZOx0rVGWT0 1
 AINZW/4MSzQ1 foo
 V7/Cv0ShonY0 supercalifragilisticexpialidocious
+jdwmI1F5evD0 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr
+UlrmE/pDCZE/ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz

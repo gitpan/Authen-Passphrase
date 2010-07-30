@@ -51,6 +51,7 @@ exceptionally weak design, flawed in pretty much every respect.
 
 package Authen::Passphrase::LANManager;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -58,10 +59,9 @@ use Authen::Passphrase 0.003;
 use Authen::Passphrase::LANManagerHalf;
 use Carp qw(croak);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(first_half second_half);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -94,7 +94,7 @@ Either the hash or the passphrase must be given.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::LANManager $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $hash;
 	my $passphrase;
 	while(@_) {
@@ -176,7 +176,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::LANManager $self = shift;
+	my($self) = @_;
 	return $self->{first_half}->hash.$self->{second_half}->hash;
 }
 
@@ -187,7 +187,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::LANManager $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->hash);
 }
 
@@ -199,7 +199,7 @@ C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 =cut
 
 sub first_half {
-	my Authen::Passphrase::LANManager $self = shift;
+	my($self) = @_;
 	return $self->{first_half};
 }
 
@@ -211,7 +211,7 @@ C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 =cut
 
 sub second_half {
-	my Authen::Passphrase::LANManager $self = shift;
+	my($self) = @_;
 	return $self->{second_half};
 }
 
@@ -224,14 +224,12 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _passphrase_acceptable {
-	my Authen::Passphrase::LANManager $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $passphrase =~ /\A[\x00-\xff]{0,14}\z/;
 }
 
 sub match {
-	my Authen::Passphrase::LANManager $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->{first_half}->match(substr($passphrase, 0, 7)) &&
 		$self->{second_half}->match(
@@ -241,7 +239,7 @@ sub match {
 }
 
 sub as_rfc2307 {
-	my Authen::Passphrase::LANManager $self = shift;
+	my($self) = @_;
 	return "{LANMAN}".$self->hash_hex;
 }
 
@@ -259,7 +257,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

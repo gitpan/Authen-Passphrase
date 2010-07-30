@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 176;
 
 BEGIN { use_ok "Authen::Passphrase::BigCrypt"; }
@@ -80,6 +83,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 7S 4VBRyAvp9nw

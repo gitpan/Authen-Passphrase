@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 59;
 
 BEGIN { use_ok "Authen::Passphrase::MySQL41"; }
@@ -32,6 +35,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 be1bdec0aa74b4dcb079943e70528096cca985f8

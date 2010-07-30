@@ -30,15 +30,16 @@ know what you're doing.
 
 package Authen::Passphrase::Clear;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
+use parent "Authen::Passphrase";
 
 # An object of this class is a blessed scalar containing the passphrase.
 
@@ -120,7 +121,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

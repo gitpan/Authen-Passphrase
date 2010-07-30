@@ -44,6 +44,7 @@ only, not by choice.
 
 package Authen::Passphrase::NTHash;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -51,10 +52,9 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -87,7 +87,7 @@ Either the hash or the passphrase must be given.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::NTHash $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -178,7 +178,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::NTHash $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -189,7 +189,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::NTHash $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{hash});
 }
 
@@ -204,26 +204,24 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::NTHash $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	$passphrase = substr($passphrase, 0, 128);
 	$passphrase =~ s/(.)/pack("v", ord($1))/eg;
 	return md4($passphrase);
 }
 
 sub match {
-	my Authen::Passphrase::NTHash $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::NTHash $self = shift;
+	my($self) = @_;
 	return "\$3\$\$".$self->hash_hex;
 }
 
 sub as_rfc2307 {
-	my Authen::Passphrase::NTHash $self = shift;
+	my($self) = @_;
 	return "{MSNT}".$self->hash_hex;
 }
 
@@ -240,7 +238,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

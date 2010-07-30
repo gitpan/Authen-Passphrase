@@ -36,15 +36,16 @@ be public in a system that expects some type of passphrase access control.
 
 package Authen::Passphrase::AcceptAll;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
+use parent "Authen::Passphrase";
 
 # There is only one object of this class, and its content is
 # insignificant.
@@ -123,7 +124,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

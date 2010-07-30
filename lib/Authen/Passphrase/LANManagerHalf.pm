@@ -54,6 +54,7 @@ exceptionally weak design, flawed in pretty much every respect.
 
 package Authen::Passphrase::LANManagerHalf;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -61,10 +62,9 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::DES;
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -97,7 +97,7 @@ Either the hash or the passphrase must be given.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::LANManagerHalf $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -171,7 +171,7 @@ Returns the hash value, as a string of 8 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -182,7 +182,7 @@ Returns the hash value, as a string of 16 hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{hash});
 }
 
@@ -197,14 +197,12 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _passphrase_acceptable {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $passphrase =~ /\A[\x00-\xff]{0,7}\z/;
 }
 
 sub _hash_of {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	$passphrase = uc($passphrase);
 	$passphrase = "\0".$passphrase."\0\0\0\0\0\0\0\0";
 	my $key = "";
@@ -217,14 +215,13 @@ sub _hash_of {
 }
 
 sub match {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::LANManagerHalf $self = shift;
+	my($self) = @_;
 	return "\$LM\$".$self->hash_hex;
 }
 
@@ -242,7 +239,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 14;
 
 BEGIN { use_ok "Authen::Passphrase::AcceptAll"; }
@@ -25,3 +28,5 @@ is $ppr->passphrase, "";
 
 is $ppr->as_crypt, "";
 is $ppr->as_rfc2307, "{CRYPT}";
+
+1;

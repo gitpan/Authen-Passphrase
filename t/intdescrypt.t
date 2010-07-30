@@ -1,8 +1,11 @@
+use warnings;
+use strict;
+
 use Test::More tests => 58;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
 
-$ppr = Authen::Passphrase::DESCrypt
+my $ppr = Authen::Passphrase::DESCrypt
 		->new(fold => 1, initial_base64 => "6UN3gAqtTbM",
 		      nrounds_base64 => "xIw.",
 		      salt_base64 => "a.rS", hash_base64 => "7KB8x6lwIKQ");
@@ -84,3 +87,5 @@ is $ppr->nrounds_base64_4, "N...";
 like $ppr->salt_base64_4, qr/\A..\.\.\z/;
 is length($ppr->hash), 8;
 ok $ppr->match("wibble");
+
+1;

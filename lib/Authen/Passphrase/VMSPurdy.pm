@@ -74,6 +74,7 @@ matching.
 
 package Authen::Passphrase::VMSPurdy;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -82,10 +83,9 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(algorithm salt username hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -149,7 +149,7 @@ passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::VMSPurdy $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -272,7 +272,7 @@ processing long strings).
 =cut
 
 sub algorithm {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return $self->{algorithm};
 }
 
@@ -284,7 +284,7 @@ uppercase, which is the canonical form.
 =cut
 
 sub username {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return $self->{username};
 }
 
@@ -295,7 +295,7 @@ Returns the salt, as an integer.
 =cut
 
 sub salt {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -309,7 +309,7 @@ byte.
 =cut
 
 sub salt_hex {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return sprintf("%02X%02X", $self->{salt} & 0xff, $self->{salt} >> 8);
 }
 
@@ -320,7 +320,7 @@ Returns the hash value, as a string of eight bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -331,7 +331,7 @@ Returns the hash value, as a string of 16 uppercase hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return uc(unpack("H*", $self->{hash}));
 }
 
@@ -346,8 +346,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _passphrase_acceptable {
-	my Authen::Passphrase::VMSPurdy $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $passphrase =~ /\A[_\$0-9A-Za-z]{1,32}\z/;
 }
 
@@ -358,15 +357,13 @@ my %hpwd_alg_num = (
 );
 
 sub _hash_of {
-	my Authen::Passphrase::VMSPurdy $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return lgi_hpwd($self->{username}, uc($passphrase),
 			$hpwd_alg_num{$self->{algorithm}}, $self->{salt});
 }
 
 sub match {
-	my Authen::Passphrase::VMSPurdy $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_passphrase_acceptable($passphrase) &&
 		$self->_hash_of($passphrase) eq $self->{hash};
 }
@@ -378,7 +375,7 @@ my %crypt_alg_num = (
 );
 
 sub as_crypt {
-	my Authen::Passphrase::VMSPurdy $self = shift;
+	my($self) = @_;
 	return "\$VMS".$crypt_alg_num{$self->{algorithm}}."\$".
 		$self->salt_hex.$self->hash_hex.$self->{username};
 }
@@ -396,7 +393,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

@@ -77,6 +77,7 @@ sse L<Authen::Passphrase::BlowfishCrypt>.
 
 package Authen::Passphrase::MD5Crypt;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -85,10 +86,9 @@ use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(salt hash_base64);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -130,7 +130,7 @@ The salt must be given, and either the hash or the passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::MD5Crypt $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -212,7 +212,7 @@ Returns the salt, in raw form.
 =cut
 
 sub salt {
-	my Authen::Passphrase::MD5Crypt $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -223,7 +223,7 @@ Returns the hash value, as a string of 22 base 64 digits.
 =cut
 
 sub hash_base64 {
-	my Authen::Passphrase::MD5Crypt $self = shift;
+	my($self) = @_;
 	return $self->{hash_base64};
 }
 
@@ -241,8 +241,7 @@ bytes, and it cannot contain any NUL or "B<$>" characters.
 =cut
 
 sub _hash_base64_of {
-	my Authen::Passphrase::MD5Crypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	die "can't use a crypt-incompatible salt yet ".
 			"(need generalised Crypt::MD5Passwd)"
 		if $self->{salt} =~ /[^\!-\#\%-9\;-\~]/ ||
@@ -253,13 +252,12 @@ sub _hash_base64_of {
 }
 
 sub match {
-	my Authen::Passphrase::MD5Crypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_base64_of($passphrase) eq $self->{hash_base64};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::MD5Crypt $self = shift;
+	my($self) = @_;
 	croak "can't put this salt into a crypt string"
 		if $self->{salt} =~ /[^\!-\#\%-9\;-\~]/ ||
 			length($self->{salt}) > 8;
@@ -279,7 +277,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

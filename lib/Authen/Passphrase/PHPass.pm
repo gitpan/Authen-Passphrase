@@ -60,6 +60,7 @@ to "B<z>" (in ASCII order).
 
 package Authen::Passphrase::PHPass;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -68,10 +69,9 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(cost salt hash);
+use parent "Authen::Passphrase";
 
 my $base64_digits = "./0123456789ABCDEFGHIJKLMNOPQRST".
 		    "UVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -173,7 +173,7 @@ The cost and salt must be given, and either the hash or the passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::PHPass $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -274,7 +274,7 @@ be performed.
 =cut
 
 sub cost {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	return $self->{cost};
 }
 
@@ -286,7 +286,7 @@ be performed, expressed as a single base 64 digit.
 =cut
 
 sub cost_base64 {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	return substr($base64_digits, $self->{cost}, 1);
 }
 
@@ -313,7 +313,7 @@ Returns the salt, as a string of eight bytes.
 =cut
 
 sub salt {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -324,7 +324,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -335,7 +335,7 @@ Returns the hash value, as a string of 22 base 64 digits.
 =cut
 
 sub hash_base64 {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	return _en_base64($self->{hash});
 }
 
@@ -350,8 +350,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::PHPass $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	my $ctx = Digest::MD5->new;
 	$ctx->add($self->{salt});
 	$ctx->add($passphrase);
@@ -366,13 +365,12 @@ sub _hash_of {
 }
 
 sub match {
-	my Authen::Passphrase::PHPass $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::PHPass $self = shift;
+	my($self) = @_;
 	croak "can't put this salt into a crypt string"
 		if $self->{salt} =~ /[^!-9;-~]/;
 	return "\$P\$".$self->cost_base64.$self->{salt}.$self->hash_base64;
@@ -391,7 +389,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

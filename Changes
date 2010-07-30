@@ -1,3 +1,37 @@
+version 0.007; 2010-07-30
+
+  * bugfix: in A::P::SaltedDigest, use "[0-9a-zA-Z_]" instead of "\w"
+    in regexps where only ASCII characters are desired
+
+  * bugfix: in A::P::BlowfishCrypt, require bugfixed version of
+    Crypt::Eksblowfish (for memory leak fix)
+
+  * bugfix: in A::P::SaltedDigest, require bugfixed version of
+    Module::Runtime (for ASCII restriction of module name syntax)
+
+  * in A::P::EggdropBlowfish, use Crypt::Eksblowfish::Uklblowfish instead
+    of Crypt::Blowfish to remove limitation on passphrase length
+
+  * abandon use of the "fields" module
+
+  * use simpler "parent" pragma in place of "base"
+
+  * in documentation, use the term "truth value" instead of the less
+    precise "boolean"
+
+  * in A::P documentation, add MooseX::Types::Authen::Passphrase to
+    "see also" list
+
+  * check for required Perl version at runtime
+
+  * use full stricture in test suite
+
+  * in Build.PL, explicitly declare configure-time requirements
+
+  * remove bogus "exit 0" from Build.PL
+
+  * add MYMETA.yml to .cvsignore
+
 version 0.006; 2009-03-07
 
   * bugfix: in A::P::SaltedDigest, use "[0-9]" instead of "\d" in regexps

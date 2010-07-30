@@ -81,18 +81,18 @@ L<Authen::Passphrase::SaltedDigest> for more efficient hash algorithms.
 
 package Authen::Passphrase::BlowfishCrypt;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
-use Crypt::Eksblowfish::Bcrypt 0.005 qw(bcrypt_hash en_base64 de_base64);
+use Crypt::Eksblowfish::Bcrypt 0.008 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(key_nul cost salt hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -107,7 +107,7 @@ crypt() algorithm.  The following attributes may be given:
 
 =item B<key_nul>
 
-Boolean indicating whether to append a NUL to the passphrase before using
+Truth value indicating whether to append a NUL to the passphrase before using
 it as a key.  The algorithm as originally devised does not do this,
 but it was later modified to do it.  The version that does append NUL
 is to be preferred.  Default true.
@@ -154,7 +154,7 @@ The cost and salt must be given, and either the hash or the passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::BlowfishCrypt $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -253,13 +253,13 @@ crypt() algorithm, from an RFC 2307 string.  The string must consist of
 
 =item $ppr->key_nul
 
-Returns a boolean indicating whether a NUL will be appended to the
+Returns a truth value indicating whether a NUL will be appended to the
 passphrase before using it as a key.
 
 =cut
 
 sub key_nul {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return $self->{key_nul};
 }
 
@@ -271,7 +271,7 @@ be performed.
 =cut
 
 sub cost {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return $self->{cost};
 }
 
@@ -290,7 +290,7 @@ Returns the salt, as a string of sixteen bytes.
 =cut
 
 sub salt {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -301,7 +301,7 @@ Returns the salt, as a string of 22 base 64 digits.
 =cut
 
 sub salt_base64 {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return en_base64($self->{salt});
 }
 
@@ -312,7 +312,7 @@ Returns the hash value, as a string of 23 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -323,7 +323,7 @@ Returns the hash value, as a string of 31 base 64 digits.
 =cut
 
 sub hash_base64 {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	return en_base64($self->{hash});
 }
 
@@ -338,8 +338,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return bcrypt_hash({
 		key_nul => $self->{key_nul},
 		cost => $self->{cost},
@@ -348,13 +347,12 @@ sub _hash_of {
 }
 
 sub match {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::BlowfishCrypt $self = shift;
+	my($self) = @_;
 	croak "passphrase can't be expressed as a crypt string"
 		if $self->{cost} > 99;
 	return sprintf("\$2%s\$%02d\$%s%s", $self->key_nul ? "a" : "",
@@ -374,7 +372,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

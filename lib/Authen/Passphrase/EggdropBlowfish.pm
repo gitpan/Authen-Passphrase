@@ -38,12 +38,6 @@ and the last six encode the first half.  Within each half the bytes
 are encoded in reverse order.  The base 64 digits are "B<.>", "B</>",
 "B<0>" to "B<9>", "B<a>" to "B<z>", "B<A>" to "B<Z>" (in that order).
 
-I<Note:> Due to the Blowfish key length restriction being strictly
-enforced in C<Crypt::Blowfish>, this module currently C<die>s if given
-a passphrase longer than 56 bytes.  This limitation will be corrected
-in a future version.  Passphrases shorter than 8 bytes are correctly
-handled despite Blowfish rules.
-
 I<Warning:> The hash is small by modern standards, and the lack of salt
 is a weakness in this scheme.  For a scheme that makes better use of
 Blowfish see L<Authen::Passphrase::BlowfishCrypt>.
@@ -52,17 +46,17 @@ Blowfish see L<Authen::Passphrase::BlowfishCrypt>.
 
 package Authen::Passphrase::EggdropBlowfish;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
-use Crypt::Blowfish 2.00;
+use Crypt::Eksblowfish::Uklblowfish 0.008;
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(hash);
+use parent "Authen::Passphrase";
 
 my $b64_digits =
 	"./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -124,7 +118,7 @@ Either the hash or the passphrase must be given.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::EggdropBlowfish $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -172,7 +166,7 @@ Returns the hash value, as a string of eight bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::EggdropBlowfish $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -183,7 +177,7 @@ Returns the hash value, as a string of twelve base 64 digits.
 =cut
 
 sub hash_base64 {
-	my Authen::Passphrase::EggdropBlowfish $self = shift;
+	my($self) = @_;
 	return _en_base64($self->{hash});
 }
 
@@ -194,22 +188,14 @@ This method is part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::EggdropBlowfish $self = shift;
-	my($passphrase) = @_;
-	# Crypt::Blowfish only accepts key lengths 8 to 56 (inclusive).
-	# The Eggdrop version accepts lengths 1 upwards.  Bytes after 72
-	# have no effect.
-	croak "Crypt::Blowfish won't accept a key longer than 56 bytes ".
-			"(TODO: need up to 72)"
-		if length($passphrase) > 56;
-	$passphrase .= $passphrase while length($passphrase) < 8;
-	my $cipher = Crypt::Blowfish->new($passphrase);
+	my($self, $passphrase) = @_;
+	$passphrase = substr($passphrase, 0, 72);
+	my $cipher = Crypt::Eksblowfish::Uklblowfish->new($passphrase);
 	return $cipher->encrypt("\xde\xad\xd0\x61\x23\xf6\xb0\x95");
 }
 
 sub match {
-	my Authen::Passphrase::EggdropBlowfish $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $passphrase ne "" &&
 		$self->_hash_of($passphrase) eq $self->{hash};
 }
@@ -219,7 +205,7 @@ sub match {
 =head1 SEE ALSO
 
 L<Authen::Passphrase>,
-L<Crypt::Blowfish>
+L<Crypt::Eksblowfish::Uklblowfish>
 
 =head1 AUTHOR
 
@@ -227,7 +213,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

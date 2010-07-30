@@ -1,4 +1,4 @@
 Build Makefile
 _build blib
-META.yml Makefile.PL SIGNATURE
+META.yml MYMETA.yml Makefile.PL SIGNATURE
 Authen-Passphrase-*

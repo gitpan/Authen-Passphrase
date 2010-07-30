@@ -65,6 +65,7 @@ security than the plain DES scheme alone.  Do not use seriously.
 
 package Authen::Passphrase::BigCrypt;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -74,9 +75,9 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.08 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTOR
 
@@ -280,7 +281,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

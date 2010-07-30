@@ -82,6 +82,7 @@ exchange of passphrase hashes.
 
 package Authen::Passphrase;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -89,7 +90,7 @@ use Carp qw(croak);
 use MIME::Base64 2.21 qw(decode_base64);
 use Module::Runtime 0.005 qw(use_module);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
 =head1 CONSTRUCTORS
 
@@ -221,8 +222,8 @@ are regarded as invalid encodings.
 
 my %crypt_scheme_handler = (
 	"1"    => [ "Authen::Passphrase::MD5Crypt", 0.003 ],
-	"2"    => [ "Authen::Passphrase::BlowfishCrypt", 0.006 ],
-	"2a"   => [ "Authen::Passphrase::BlowfishCrypt", 0.006 ],
+	"2"    => [ "Authen::Passphrase::BlowfishCrypt", 0.007 ],
+	"2a"   => [ "Authen::Passphrase::BlowfishCrypt", 0.007 ],
 	"3"    => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"IPB2" => sub($) { croak '$IPB2$ is unimplemented' },
 	"K4"   => sub($) { croak '$K4$ is unimplemented' },
@@ -383,15 +384,15 @@ my %rfc2307_scheme_handler = (
 	"KERBEROS"   => sub($) { croak "{KERBEROS} is a placeholder" },
 	"LANM"       => [ "Authen::Passphrase::LANManager", 0.003 ],
 	"LANMAN"     => [ "Authen::Passphrase::LANManager", 0.003 ],
-	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
-	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
 	"MSNT"       => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"NS-MTA-MD5" => [ "Authen::Passphrase::NetscapeMail", 0.003 ],
-	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
 	"SASL"       => sub($) { croak "{SASL} is a placeholder" },
-	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
-	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
-	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.006 ],
+	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
 	"UNIX"       => sub($) { croak "{UNIX} is a placeholder" },
 	# "WM-CRY" is handled specially
 );
@@ -424,7 +425,7 @@ sub from_rfc2307 {
 
 =item $ppr->match(PASSPHRASE)
 
-Checks whether the supplied passphrase is correct.  Returns a boolean.
+Checks whether the supplied passphrase is correct.  Returns a truth value.
 
 =item $ppr->passphrase
 
@@ -474,6 +475,7 @@ attacks are not appropriate implementations.
 
 =head1 SEE ALSO
 
+L<MooseX::Types::Authen::Passphrase>,
 L<crypt(3)>,
 RFC 2307
 
@@ -483,7 +485,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

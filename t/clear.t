@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 49;
 
 BEGIN { use_ok "Authen::Passphrase::Clear"; }
@@ -21,3 +24,5 @@ foreach my $rightphrase (@test_phrases) {
 	isnt $@, "";
 	is $ppr->as_rfc2307, "{CLEARTEXT}".$rightphrase;
 }
+
+1;

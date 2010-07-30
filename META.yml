@@ -1,18 +1,91 @@
 ---
-name: Authen-Passphrase
-version: 0.006
+abstract: 'hashed passwords/passphrases as objects'
 author:
   - 'Andrew Main (Zefram) <zefram@fysh.org>'
-abstract: hashed passwords/passphrases as objects
+build_requires:
+  MIME::Base64: 2.21
+  Module::Build: 0
+  Test::More: 0
+  perl: 5.006
+  strict: 0
+  warnings: 0
+configure_requires:
+  Module::Build: 0
+  perl: 5.006
+  strict: 0
+  warnings: 0
+distribution_type: module
+dynamic_config: 0
+generated_by: 'Module::Build version 0.3607'
 license: perl
-resources:
-  license: ~
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Authen-Passphrase
+provides:
+  Authen::Passphrase:
+    file: lib/Authen/Passphrase.pm
+    version: 0.007
+  Authen::Passphrase::AcceptAll:
+    file: lib/Authen/Passphrase/AcceptAll.pm
+    version: 0.007
+  Authen::Passphrase::BigCrypt:
+    file: lib/Authen/Passphrase/BigCrypt.pm
+    version: 0.007
+  Authen::Passphrase::BlowfishCrypt:
+    file: lib/Authen/Passphrase/BlowfishCrypt.pm
+    version: 0.007
+  Authen::Passphrase::Clear:
+    file: lib/Authen/Passphrase/Clear.pm
+    version: 0.007
+  Authen::Passphrase::Crypt16:
+    file: lib/Authen/Passphrase/Crypt16.pm
+    version: 0.007
+  Authen::Passphrase::DESCrypt:
+    file: lib/Authen/Passphrase/DESCrypt.pm
+    version: 0.007
+  Authen::Passphrase::EggdropBlowfish:
+    file: lib/Authen/Passphrase/EggdropBlowfish.pm
+    version: 0.007
+  Authen::Passphrase::LANManager:
+    file: lib/Authen/Passphrase/LANManager.pm
+    version: 0.007
+  Authen::Passphrase::LANManagerHalf:
+    file: lib/Authen/Passphrase/LANManagerHalf.pm
+    version: 0.007
+  Authen::Passphrase::MD5Crypt:
+    file: lib/Authen/Passphrase/MD5Crypt.pm
+    version: 0.007
+  Authen::Passphrase::MySQL323:
+    file: lib/Authen/Passphrase/MySQL323.pm
+    version: 0.007
+  Authen::Passphrase::MySQL41:
+    file: lib/Authen/Passphrase/MySQL41.pm
+    version: 0.007
+  Authen::Passphrase::NTHash:
+    file: lib/Authen/Passphrase/NTHash.pm
+    version: 0.007
+  Authen::Passphrase::NetscapeMail:
+    file: lib/Authen/Passphrase/NetscapeMail.pm
+    version: 0.007
+  Authen::Passphrase::PHPass:
+    file: lib/Authen/Passphrase/PHPass.pm
+    version: 0.007
+  Authen::Passphrase::RejectAll:
+    file: lib/Authen/Passphrase/RejectAll.pm
+    version: 0.007
+  Authen::Passphrase::SaltedDigest:
+    file: lib/Authen/Passphrase/SaltedDigest.pm
+    version: 0.007
+  Authen::Passphrase::VMSPurdy:
+    file: lib/Authen/Passphrase/VMSPurdy.pm
+    version: 0.007
 requires:
   Authen::DecHpwd: 2.003
   Carp: 0
-  Crypt::Blowfish: 2.00
   Crypt::DES: 0
-  Crypt::Eksblowfish::Bcrypt: 0.005
+  Crypt::Eksblowfish::Bcrypt: 0.008
+  Crypt::Eksblowfish::Uklblowfish: 0.008
   Crypt::MySQL: 0.03
   Crypt::PasswdMD5: 1.0
   Crypt::UnixCrypt_XS: 0.08
@@ -22,81 +95,12 @@ requires:
   Digest::MD5: 1.9953
   Digest::SHA1: 0
   MIME::Base64: 2.21
-  Module::Runtime: 0.005
+  Module::Runtime: 0.006
   Params::Classify: 0
-  base: 0
-  fields: 0
+  parent: 0
   perl: 5.006
   strict: 0
   warnings: 0
-build_requires:
-  MIME::Base64: 2.21
-  Module::Build: 0
-  Test::More: 0
-  perl: 5.006
-  strict: 0
-  warnings: 0
-dynamic_config: 0
-provides:
-  Authen::Passphrase:
-    file: lib/Authen/Passphrase.pm
-    version: 0.006
-  Authen::Passphrase::AcceptAll:
-    file: lib/Authen/Passphrase/AcceptAll.pm
-    version: 0.006
-  Authen::Passphrase::BigCrypt:
-    file: lib/Authen/Passphrase/BigCrypt.pm
-    version: 0.006
-  Authen::Passphrase::BlowfishCrypt:
-    file: lib/Authen/Passphrase/BlowfishCrypt.pm
-    version: 0.006
-  Authen::Passphrase::Clear:
-    file: lib/Authen/Passphrase/Clear.pm
-    version: 0.006
-  Authen::Passphrase::Crypt16:
-    file: lib/Authen/Passphrase/Crypt16.pm
-    version: 0.006
-  Authen::Passphrase::DESCrypt:
-    file: lib/Authen/Passphrase/DESCrypt.pm
-    version: 0.006
-  Authen::Passphrase::EggdropBlowfish:
-    file: lib/Authen/Passphrase/EggdropBlowfish.pm
-    version: 0.006
-  Authen::Passphrase::LANManager:
-    file: lib/Authen/Passphrase/LANManager.pm
-    version: 0.006
-  Authen::Passphrase::LANManagerHalf:
-    file: lib/Authen/Passphrase/LANManagerHalf.pm
-    version: 0.006
-  Authen::Passphrase::MD5Crypt:
-    file: lib/Authen/Passphrase/MD5Crypt.pm
-    version: 0.006
-  Authen::Passphrase::MySQL323:
-    file: lib/Authen/Passphrase/MySQL323.pm
-    version: 0.006
-  Authen::Passphrase::MySQL41:
-    file: lib/Authen/Passphrase/MySQL41.pm
-    version: 0.006
-  Authen::Passphrase::NTHash:
-    file: lib/Authen/Passphrase/NTHash.pm
-    version: 0.006
-  Authen::Passphrase::NetscapeMail:
-    file: lib/Authen/Passphrase/NetscapeMail.pm
-    version: 0.006
-  Authen::Passphrase::PHPass:
-    file: lib/Authen/Passphrase/PHPass.pm
-    version: 0.006
-  Authen::Passphrase::RejectAll:
-    file: lib/Authen/Passphrase/RejectAll.pm
-    version: 0.006
-  Authen::Passphrase::SaltedDigest:
-    file: lib/Authen/Passphrase/SaltedDigest.pm
-    version: 0.006
-  Authen::Passphrase::VMSPurdy:
-    file: lib/Authen/Passphrase/VMSPurdy.pm
-    version: 0.006
-generated_by: Module::Build version 0.31012
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
-distribution_type: module
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.007

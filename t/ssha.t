@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 70;
 
 use MIME::Base64 2.21 qw(encode_base64);
@@ -43,6 +46,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 616263 a9993e364706816aba3e25717850c26c9cd0d89d

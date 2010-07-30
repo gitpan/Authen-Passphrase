@@ -1,3 +1,4 @@
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -6,6 +7,12 @@ use Module::Build;
 Module::Build->new(
 	module_name => "Authen::Passphrase",
 	license => "perl",
+	configure_requires => {
+		"Module::Build" => 0,
+		"perl" => "5.006",
+		"strict" => 0,
+		"warnings" => 0,
+	},
 	build_requires => {
 		"MIME::Base64" => "2.21",
 		"Module::Build" => 0,
@@ -17,9 +24,9 @@ Module::Build->new(
 	requires => {
 		"Authen::DecHpwd" => "2.003",
 		"Carp" => 0,
-		"Crypt::Blowfish" => "2.00",
 		"Crypt::DES" => 0,
-		"Crypt::Eksblowfish::Bcrypt" => "0.005",
+		"Crypt::Eksblowfish::Bcrypt" => "0.008",
+		"Crypt::Eksblowfish::Uklblowfish" => "0.008",
 		"Crypt::MySQL" => "0.03",
 		"Crypt::PasswdMD5" => "1.0",
 		"Crypt::UnixCrypt_XS" => "0.08",
@@ -29,10 +36,9 @@ Module::Build->new(
 		"Digest::MD5" => "1.9953",
 		"Digest::SHA1" => 0,
 		"MIME::Base64" => "2.21",
-		"Module::Runtime" => "0.005",
+		"Module::Runtime" => "0.006",
 		"Params::Classify" => 0,
-		"base" => 0,
-		"fields" => 0,
+		"parent" => 0,
 		"perl" => "5.006",
 		"strict" => 0,
 		"warnings" => 0,
@@ -43,4 +49,4 @@ Module::Build->new(
 	sign => 1,
 )->create_build_script;
 
-exit 0;
+1;

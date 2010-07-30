@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 71;
 
 BEGIN { use_ok "Authen::Passphrase::DESCrypt"; }
@@ -32,6 +35,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 xIw. Alif bXjK3LN9iE2 6UN3gAqtTbM

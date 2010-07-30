@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 75;
 
 BEGIN { use_ok "Authen::Passphrase::LANManager"; }
@@ -51,6 +54,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 aad3b435b51404eeaad3b435b51404ee

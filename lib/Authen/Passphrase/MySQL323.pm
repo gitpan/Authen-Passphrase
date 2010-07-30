@@ -40,6 +40,7 @@ for any security purpose.
 
 package Authen::Passphrase::MySQL323;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -47,10 +48,9 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::MySQL 0.03 qw(password);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTOR
 
@@ -84,7 +84,7 @@ Either the hash or the passphrase must be given.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::MySQL323 $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -131,7 +131,7 @@ Returns the hash value, as a string of eight bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::MySQL323 $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -142,7 +142,7 @@ Returns the hash value, as a string of 16 hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::MySQL323 $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{hash});
 }
 
@@ -153,14 +153,12 @@ This method is part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::MySQL323 $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return pack("H*", password($passphrase));
 }
 
 sub match {
-	my Authen::Passphrase::MySQL323 $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
@@ -177,7 +175,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

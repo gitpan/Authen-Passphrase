@@ -46,6 +46,7 @@ Prefer the mechanism of L<Authen::Passphrase::SaltedDigest>.
 
 package Authen::Passphrase::NetscapeMail;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -54,10 +55,9 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(salt hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -102,7 +102,7 @@ The salt must be given, and either the hash or the passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::NetscapeMail $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -180,7 +180,7 @@ Returns the salt value, as a string of 32 bytes.
 =cut
 
 sub salt {
-	my Authen::Passphrase::NetscapeMail $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -191,7 +191,7 @@ Returns the hash value, as a string of 16 bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::NetscapeMail $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -202,7 +202,7 @@ Returns the hash value, as a string of 32 hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::NetscapeMail $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{hash});
 }
 
@@ -215,8 +215,7 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::NetscapeMail $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	my $ctx = Digest::MD5->new;
 	$ctx->add($self->{salt});
 	$ctx->add("\x59");
@@ -227,13 +226,12 @@ sub _hash_of {
 }
 
 sub match {
-	my Authen::Passphrase::NetscapeMail $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_rfc2307 {
-	my Authen::Passphrase::NetscapeMail $self = shift;
+	my($self) = @_;
 	croak "can't put this salt into an RFC 2307 string"
 		if $self->{salt} =~ /[^!-~]/;
 	return "{NS-MTA-MD5}".$self->hash_hex.$self->{salt};
@@ -252,7 +250,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

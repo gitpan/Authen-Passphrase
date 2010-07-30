@@ -69,6 +69,7 @@ be expensive to compute.
 
 package Authen::Passphrase::SaltedDigest;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -77,13 +78,12 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest 1.00;
 use MIME::Base64 2.21 qw(encode_base64 decode_base64);
-use Module::Runtime 0.005 qw(is_valid_module_name use_module);
+use Module::Runtime 0.006 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(algorithm salt hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -159,7 +159,7 @@ The digest algorithm must be given, and either the hash or the passphrase.
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::SaltedDigest $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -286,7 +286,7 @@ constructor.
 =cut
 
 sub algorithm {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	return $self->{algorithm};
 }
 
@@ -297,7 +297,7 @@ Returns the salt, in raw form.
 =cut
 
 sub salt {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -308,7 +308,7 @@ Returns the salt, as a string of hexadecimal digits.
 =cut
 
 sub salt_hex {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{salt});
 }
 
@@ -319,7 +319,7 @@ Returns the hash value, in raw form.
 =cut
 
 sub hash {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -330,7 +330,7 @@ Returns the hash value, as a string of hexadecimal digits.
 =cut
 
 sub hash_hex {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	return unpack("H*", $self->{hash});
 }
 
@@ -345,13 +345,12 @@ can be represented in RFC 2307 form.
 =cut
 
 sub _hash_of {
-	my Authen::Passphrase::SaltedDigest $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	my $alg = $self->{algorithm};
 	my $ctx;
 	if(is_string($alg)) {
 		if($alg =~ /::/) {
-			$alg =~ /\A(?:::)?([\w:]+)
+			$alg =~ /\A(?:::)?([0-9a-zA-Z_:]+)
 				   (-([0-9][0-9_]*(?:\._*[0-9][0-9_]*)?)?)?\z/x
 				or croak "module spec `$alg' not understood";
 			my($pkgname, $load_p, $modver) = ($1, $2, $3);
@@ -380,8 +379,7 @@ sub _hash_of {
 }
 
 sub match {
-	my Authen::Passphrase::SaltedDigest $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
@@ -406,13 +404,14 @@ my %rfc2307_scheme_for_package_name = (
 );
 
 sub as_rfc2307 {
-	my Authen::Passphrase::SaltedDigest $self = shift;
+	my($self) = @_;
 	my $alg = $self->{algorithm};
 	my $scheme;
 	if(is_string($alg)) {
 		if($alg =~ /::/) {
 			$scheme = $rfc2307_scheme_for_package_name{$1}
-				if $alg =~ /\A(?:::)?([\w:]+)(?:-[0-9._]*)?\z/;
+				if $alg =~ /\A(?:::)?
+					    ([0-9a-zA-Z_:]+)(?:-[0-9._]*)?\z/x;
 		} else {
 			$scheme = $rfc2307_scheme_for_digest_name{$alg};
 		}
@@ -436,7 +435,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

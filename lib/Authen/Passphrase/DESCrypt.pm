@@ -114,6 +114,7 @@ eleven give the hash.
 
 package Authen::Passphrase::DESCrypt;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -127,10 +128,9 @@ use Crypt::UnixCrypt_XS 0.08 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
 
-use base qw(Authen::Passphrase);
-use fields qw(fold initial nrounds salt hash);
+use parent "Authen::Passphrase";
 
 =head1 CONSTRUCTORS
 
@@ -145,7 +145,7 @@ DES-based crypt() algorithm.  The following attributes may be given:
 
 =item B<fold>
 
-Boolean indicating whether the BSDi passphrase folding scheme should be
+Truth value indicating whether the BSDi passphrase folding scheme should be
 used for long passphrases.  Default false, for compatibility with the
 original DES-based scheme.
 
@@ -205,7 +205,7 @@ parameters default to those used in the original DES-based crypt().
 
 sub new {
 	my $class = shift;
-	my Authen::Passphrase::DESCrypt $self = fields::new($class);
+	my $self = bless({}, $class);
 	my $passphrase;
 	while(@_) {
 		my $attr = shift;
@@ -340,12 +340,12 @@ crypt() algorithm, from an RFC 2307 string.  The string must consist of
 
 =item $ppr->fold
 
-Returns a boolean indicating whether passphrase folding is used.
+Returns a truth value indicating whether passphrase folding is used.
 
 =cut
 
 sub fold {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return $self->{fold};
 }
 
@@ -356,7 +356,7 @@ Returns the initial block, as a string of eight bytes.
 =cut
 
 sub initial {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return $self->{initial};
 }
 
@@ -367,7 +367,7 @@ Returns the initial block, as a string of eleven base 64 digits.
 =cut
 
 sub initial_base64 {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return block_to_base64($self->{initial});
 }
 
@@ -378,7 +378,7 @@ Returns the number of encryption rounds, as a Perl integer.
 =cut
 
 sub nrounds {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return $self->{nrounds};
 }
 
@@ -390,7 +390,7 @@ Returns the number of encryption rounds, as a string of four base
 =cut
 
 sub nrounds_base64_4 {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return int24_to_base64($self->{nrounds});
 }
 
@@ -401,7 +401,7 @@ Returns the salt, as a Perl integer.
 =cut
 
 sub salt {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return $self->{salt};
 }
 
@@ -413,7 +413,7 @@ doesn't fit into two digits.
 =cut
 
 sub salt_base64_2 {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	my $salt = $self->{salt};
 	croak "salt $salt doesn't fit into two digits" if $salt >= 4096;
 	return int12_to_base64($salt);
@@ -426,7 +426,7 @@ Returns the salt, as a string of four base 64 digits.
 =cut
 
 sub salt_base64_4 {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return int24_to_base64($self->{salt});
 }
 
@@ -437,7 +437,7 @@ Returns the hash value, as a string of eight bytes.
 =cut
 
 sub hash {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return $self->{hash};
 }
 
@@ -448,7 +448,7 @@ Returns the hash value, as a string of eleven base 64 digits.
 =cut
 
 sub hash_base64 {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	return block_to_base64($self->{hash});
 }
 
@@ -465,21 +465,19 @@ These methods are part of the standard C<Authen::Passphrase> interface.
 
 
 sub _hash_of {
-	my Authen::Passphrase::DESCrypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	$passphrase = fold_password($passphrase) if $self->{fold};
 	return crypt_rounds($passphrase, $self->{nrounds}, $self->{salt},
 			    $self->{initial});
 }
 
 sub match {
-	my Authen::Passphrase::DESCrypt $self = shift;
-	my($passphrase) = @_;
+	my($self, $passphrase) = @_;
 	return $self->_hash_of($passphrase) eq $self->{hash};
 }
 
 sub as_crypt {
-	my Authen::Passphrase::DESCrypt $self = shift;
+	my($self) = @_;
 	if(!$self->{fold} && $self->{initial} eq "\0\0\0\0\0\0\0\0" &&
 			$self->{nrounds} == 25 && $self->{salt} < 4096) {
 		return $self->salt_base64_2.$self->hash_base64;
@@ -504,7 +502,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2006, 2007, 2009, 2010
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

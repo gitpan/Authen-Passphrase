@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More tests => 110;
 
 BEGIN { use_ok "Authen::Passphrase::VMSPurdy"; }
@@ -125,6 +128,8 @@ foreach my $rightphrase (sort keys %pprs) {
 		ok ($ppr->match($passphrase) xor $passphrase ne $rightphrase);
 	}
 }
+
+1;
 
 __DATA__
 PURDY Chekov 63412 6ec0aed034aca888 0
