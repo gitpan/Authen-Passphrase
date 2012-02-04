@@ -45,7 +45,7 @@ crypt()
 
 An object of this class encapsulates a passphrase hashed using some
 form of the DES-based Unix crypt() hash function.  This is a subclass
-of C<Authen::Passphrase>, and this document assumes that the reader is
+of L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The crypt() function in a modern Unix actually supports several different
@@ -53,8 +53,9 @@ passphrase schemes.  That is not what this class is about.  This class
 is concerned only with one family of schemes, variants of the DES-based
 scheme that crypt() originally implemented, which confusingly is usually
 referred to merely as "crypt()".  To handle the whole range of passphrase
-schemes supported by the modern crypt(), see the C<from_crypt> constructor
-and the C<as_crypt> method in L<Authen::Passphrase>.
+schemes supported by the modern crypt(), see the
+L<from_crypt|Authen::Passphrase/from_crypt> constructor and the
+L<as_crypt|Authen::Passphrase/as_crypt> method in L<Authen::Passphrase>.
 
 I<Warning:> this password scheme is weak by modern standards, and in
 any case does not support a large password space.  Cracking crypt()ed
@@ -96,7 +97,7 @@ This was easily achieved by initialising the data block to something
 other than the standard all-bits-zero.  Another variation used was to
 increase the number of encryption rounds, which makes cracking take
 longer in addition to being non-standard.  Password hashes on such a
-system looked normal but were not interoperable with stardard crypt()
+system looked normal but were not interoperable with standard crypt()
 implementations.  To interpret them properly it is necessary to know
 the modified parameters.
 
@@ -128,7 +129,7 @@ use Crypt::UnixCrypt_XS 0.08 qw(
 );
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -315,13 +316,15 @@ sub from_crypt {
 	if($passwd =~ /\A[^\$].{12}\z/s) {
 		$passwd =~ m#\A([./0-9A-Za-z]{2})([./0-9A-Za-z]{11})\z#
 			or croak "malformed DES crypt data";
-		return $class->new(salt_base64 => $1, hash_base64 => $2);
+		my($salt, $hash) = ($1, $2);
+		return $class->new(salt_base64 => $salt, hash_base64 => $hash);
 	} elsif($passwd =~ /\A_.{19}\z/s) {
 		$passwd =~ m#\A_([./0-9A-Za-z]{4})([./0-9A-Za-z]{4})
 				([./0-9A-Za-z]{11})\z#x
 			or croak "malformed _ data";
-		return $class->new(fold => 1, nrounds_base64 => $1,
-				   salt_base64 => $2, hash_base64 => $3);
+		my($nr, $salt, $hash) = ($1, $2, $3);
+		return $class->new(fold => 1, nrounds_base64 => $nr,
+				   salt_base64 => $salt, hash_base64 => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -458,7 +461,7 @@ sub hash_base64 {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -502,7 +505,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

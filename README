@@ -13,8 +13,13 @@ they see it.  There are many schemes in use to achieve this effect,
 and the intent of this class is to provide a consistent interface to
 them all, hiding the details.
 
-The CPAN package Authen::Passphrase contains implementations of several
-specific passphrase schemes in addition to the base class.
+The CPAN package Authen-Passphrase contains implementations of several
+specific passphrase schemes in addition to the base class.  See the
+specific classes for notes on the security properties of each scheme.
+In new systems, if there is a choice of which passphrase algorithm
+to use, it is recommended to use Authen::Passphrase::SaltedDigest or
+Authen::Passphrase::BlowfishCrypt.  Most other schemes are too weak for
+new applications, and should be used only for backward compatibility.
 
 INSTALLATION
 
@@ -29,7 +34,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 LICENSE

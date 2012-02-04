@@ -21,7 +21,7 @@ Authen::Passphrase::MySQL323 - passphrases using the MySQL v3.23 algorithm
 
 An object of this class encapsulates a passphrase hashed using the
 algorithm used by MySQL from version 3.23.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The MySQL v3.23 hash scheme is composed entirely of linear operations.
@@ -48,7 +48,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::MySQL 0.03 qw(password);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -148,7 +148,7 @@ sub hash_hex {
 
 =item $ppr->match(PASSPHRASE)
 
-This method is part of the standard C<Authen::Passphrase> interface.
+This method is part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -175,7 +175,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

@@ -36,7 +36,7 @@ system
 
 An object of this class encapsulates a passphrase hashed using one of
 the Purdy polynomial hash functions used in VMS.  This is a subclass
-of C<Authen::Passphrase>, and this document assumes that the reader is
+of L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The core of the Purdy polynomial hashing algorithm transforms
@@ -83,7 +83,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -243,8 +243,9 @@ sub from_crypt {
 		$passwd =~ /\A\$VMS[123]\$([0-9A-F]{4})
 			    ([0-9A-F]{16})([_\$0-9A-Z]{1,31})\z/x
 			or croak "malformed \$VMS${alg}\$ data";
+		my($salt, $hash, $un) = ($1, $2, $3);
 		return $class->new(algorithm => $decode_crypt_alg_num{$alg},
-			username => $3, salt_hex => $1, hash_hex => $2);
+			username => $un, salt_hex => $salt, hash_hex => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -341,7 +342,7 @@ sub hash_hex {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -393,7 +394,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

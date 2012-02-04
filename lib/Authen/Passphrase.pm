@@ -27,8 +27,57 @@ they see it.  There are many schemes in use to achieve this effect,
 and the intent of this class is to provide a consistent interface to
 them all, hiding the details.
 
-The CPAN package Authen::Passphrase contains implementations of several
-specific passphrase schemes in addition to the base class.
+The CPAN package Authen-Passphrase contains implementations of several
+specific passphrase schemes in addition to the base class.  See the
+specific classes for notes on the security properties of each scheme.
+In new systems, if there is a choice of which passphrase algorithm to
+use, it is recommended to use L<Authen::Passphrase::SaltedDigest> or
+L<Authen::Passphrase::BlowfishCrypt>.  Most other schemes are too weak
+for new applications, and should be used only for backward compatibility.
+
+=head2 Side-channel cryptanalysis
+
+Both the Authen-Passphrase framework and most of the underlying
+cryptographic algorithm implementations are vulnerable to side-channel
+cryptanalytic attacks.  However, the impact of this is quite limited.
+
+Unlike the case of symmetric encryption, where a side-channel attack can
+extract the plaintext directly, the cryptographic operations involved in
+passphrase recognition don't directly process the correct passphrase.
+A sophisticated side-channel attack, applied when offering incorrect
+passphrases for checking, could potentially extract salt (from the
+operation of the hashing algorithm) and the target hash value (from
+the comparison of hash values).  This would enable a cryptanalytic or
+brute-force attack on the passphrase recogniser to be performed offline.
+This is not a disaster; the very intent of storing only a hash of
+the correct passphrase is that leakage of these stored values doesn't
+compromise the passphrase.
+
+In a typical usage scenario for this framework, the side-channel attacks
+that can be mounted are very restricted.  If authenticating network
+users, typically an attacker has no access at all to power consumption,
+electromagnetic emanation, and other such side channels.  The only
+side channel that is readily available is timing, and the precision of
+timing measurements is significantly blunted by the normal processes of
+network communication.  For example, it would not normally be feasible
+to mount a timing attack against hash value comparison (to see how far
+through the values the first mismatch was).
+
+Perl as a whole has not been built as a platform for
+side-channel-resistant cryptography, so hardening Authen-Passphrase and
+its underlying algorithms is not feasible.  In any serious use of Perl
+for cryptography, including for authentication using Authen-Passphrase,
+an analysis should be made of the exposure to side-channel attacks,
+and if necessary efforts made to further blunt the timing channel.
+
+One timing attack that is very obviously feasible over the network is to
+determine which of several passphrase hashing algorithms is being used.
+This can potentially distinguish between classes of user accounts,
+or distinguish between existing and non-existing user accounts when an
+attacker is guessing usernames.  To obscure this information requires
+an extreme restriction of the timing channel, most likely by explicitly
+pausing to standardise the amount of time spent on authentication.
+This defence also rules out essentially all other timing attacks.
 
 =head1 PASSPHRASE ENCODINGS
 
@@ -88,9 +137,9 @@ use strict;
 
 use Carp qw(croak);
 use MIME::Base64 2.21 qw(decode_base64);
-use Module::Runtime 0.005 qw(use_module);
+use Module::Runtime 0.011 qw(use_module);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 =head1 CONSTRUCTORS
 
@@ -272,7 +321,7 @@ encoding.  This constructor may only be called on the base class, not
 any subclass.
 
 The specific passphrase recogniser class is loaded at runtime.  See the
-note about this for the C<from_crypt> constructor above.
+note about this for the L</from_crypt> constructor above.
 
 Known scheme identifiers:
 
@@ -384,23 +433,25 @@ my %rfc2307_scheme_handler = (
 	"KERBEROS"   => sub($) { croak "{KERBEROS} is a placeholder" },
 	"LANM"       => [ "Authen::Passphrase::LANManager", 0.003 ],
 	"LANMAN"     => [ "Authen::Passphrase::LANManager", 0.003 ],
-	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
-	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"MD4"        => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
+	"MD5"        => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
 	"MSNT"       => [ "Authen::Passphrase::NTHash", 0.003 ],
 	"NS-MTA-MD5" => [ "Authen::Passphrase::NetscapeMail", 0.003 ],
-	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"RMD160"     => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
 	"SASL"       => sub($) { croak "{SASL} is a placeholder" },
-	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
-	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
-	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.007 ],
+	"SHA"        => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
+	"SMD5"       => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
+	"SSHA"       => [ "Authen::Passphrase::SaltedDigest", 0.008 ],
 	"UNIX"       => sub($) { croak "{UNIX} is a placeholder" },
 	# "WM-CRY" is handled specially
 );
 
 sub from_rfc2307 {
 	my($class, $userpassword) = @_;
-	return $class->from_crypt($1)
-		if $userpassword =~ m#\A\{(?i:crypt|wm-cry)\}(.*)\z#s;
+	if($userpassword =~ m#\A\{(?i:crypt|wm-cry)\}(.*)\z#s) {
+		my $passwd = $1;
+		return $class->from_crypt($passwd);
+	}
 	croak "RFC 2307 string \"$userpassword\" not supported for $class"
 		unless $class eq __PACKAGE__;
 	$userpassword =~ /\A\{([-0-9a-z]+)\}/i
@@ -454,21 +505,21 @@ sub as_rfc2307 { "{CRYPT}".$_[0]->as_crypt }
 =head1 SUBCLASSING
 
 This class is designed to be subclassed, and cannot be instantiated alone.
-Any subclass must implement the C<match> method.  That is the minimum
+Any subclass must implement the L</match> method.  That is the minimum
 required.
 
-Subclasses should implement the C<as_crypt> and C<as_rfc2307> methods
-and the C<from_crypt> and C<from_rfc2307> constructors wherever
+Subclasses should implement the L</as_crypt> and L</as_rfc2307> methods
+and the L</from_crypt> and L</from_rfc2307> constructors wherever
 appropriate, with the following exception.  If a passphrase scheme has
 a crypt encoding but no native RFC 2307 encoding, so it can be RFC 2307
-encoded only by using the "B<{CRYPT}>" scheme, then C<as_rfc2307> and
-C<from_rfc2307> should I<not> be implemented by the class.  There is a
-default implementation of the C<as_rfc2307> method that uses "B<{CRYPT}>"
-and C<as_crypt>, and a default implementation of the C<from_rfc2307>
+encoded only by using the "B<{CRYPT}>" scheme, then L</as_rfc2307> and
+L</from_rfc2307> should I<not> be implemented by the class.  There is a
+default implementation of the L</as_rfc2307> method that uses "B<{CRYPT}>"
+and L</as_crypt>, and a default implementation of the L</from_rfc2307>
 method that recognises "B<{CRYPT}>" and passes the embedded crypt string
-to the C<from_crypt> constructor.
+to the L</from_crypt> constructor.
 
-Implementation of the C<passphrase> method is entirely optional.
+Implementation of the L</passphrase> method is entirely optional.
 It should be attempted only for schemes that are so ludicrously weak as
 to allow passphrases to be cracked reliably in a short time.  Dictionary
 attacks are not appropriate implementations.
@@ -485,7 +536,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

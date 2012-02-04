@@ -1,3 +1,31 @@
+version 0.008; 2012-02-04
+
+  * bugfix: avoid passing magic variables $1 et al into functions where
+    they might unexpectedly change value
+
+  * bugfix: in A::P::SaltedDigest, when loading digest modules, use
+    bugfixed version of Module::Runtime (which works around a bug in
+    Perl 5.8 and 5.10 regarding loading context-sensitive modules)
+
+  * in base class documentation, indicate which algorithms should be
+    preferred for new applications, and discuss side-channel attacks
+
+  * in A::P::BlowfishCrypt documentation, discuss selection of cost
+    parameter
+
+  * for A::P::MySQL41, get sha1() from Digest::SHA rather than
+    Digest::SHA1, because Digest::SHA is included in the core distribution
+
+  * add many cross links in documentation
+
+  * documentation typo fixes
+
+  * include META.json in distribution
+
+  * convert .cvsignore to .gitignore
+
+  * add MYMETA.json to .cvsignore
+
 version 0.007; 2010-07-30
 
   * bugfix: in A::P::SaltedDigest, use "[0-9a-zA-Z_]" instead of "\w"

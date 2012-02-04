@@ -33,15 +33,16 @@ crypt()
 
 An object of this class encapsulates a passphrase hashed using
 the MD5-based Unix crypt() hash function.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The crypt() function in a modern Unix actually supports several
 different passphrase schemes.  This class is concerned only with one
 particular scheme, an MD5-based algorithm designed by Poul-Henning Kamp
 and originally implemented in FreeBSD.  To handle the whole range of
-passphrase schemes supported by the modern crypt(), see the C<from_crypt>
-constructor and the C<as_crypt> method in L<Authen::Passphrase>.
+passphrase schemes supported by the modern crypt(), see the
+L<from_crypt|Authen::Passphrase/from_crypt> constructor and the
+L<as_crypt|Authen::Passphrase/as_crypt> method in L<Authen::Passphrase>.
 
 The MD5-based crypt() scheme uses the whole passphrase, a salt which
 can in principle be an arbitrary byte string, and the MD5 message
@@ -71,7 +72,7 @@ The complex algorithm was designed to be slow to compute, in order
 to resist brute force attacks.  However, the complexity is fixed,
 and the operation of Moore's Law has rendered it far less expensive
 than intended.  If efficiency of a brute force attack is a concern,
-sse L<Authen::Passphrase::BlowfishCrypt>.
+see L<Authen::Passphrase::BlowfishCrypt>.
 
 =cut
 
@@ -86,7 +87,7 @@ use Carp qw(croak);
 use Crypt::PasswdMD5 1.0 qw(unix_md5_crypt);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -188,7 +189,8 @@ sub from_crypt {
 	if($passwd =~ /\A\$1\$/) {
 		$passwd =~ m:\A\$1\$([!-#%-9;-~]{0,8})\$([./0-9A-Za-z]{22})\z:
 			or croak "malformed \$1\$ data";
-		return $class->new(salt => $1, hash_base64 => $2);
+		my($salt, $hash) = ($1, $2);
+		return $class->new(salt => $salt, hash_base64 => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -233,7 +235,7 @@ sub hash_base64 {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 Not every passphrase recogniser of this type can be represented as a
 crypt string: the crypt format only allows the salt to be up to eight
 bytes, and it cannot contain any NUL or "B<$>" characters.
@@ -277,7 +279,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

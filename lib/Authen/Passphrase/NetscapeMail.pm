@@ -31,7 +31,7 @@ Server's method
 
 An object of this class encapsulates a passphrase hashed using
 the algorithm used by Netscape Mail Server.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The Netscape Mail Server scheme is based on the MD5 digest algorithm.
@@ -55,7 +55,7 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -162,7 +162,8 @@ sub from_rfc2307 {
 	if($userpassword =~ /\A\{(?i:ns-mta-md5)\}/) {
 		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})([!-~]{32})\z/
 			or croak "malformed {NS-MTA-MD5} data";
-		return $class->new(salt => $2, hash_hex => $1);
+		my($hash, $salt) = ($1, $2);
+		return $class->new(salt => $salt, hash_hex => $hash);
 	}
 	return $class->SUPER::from_rfc2307($userpassword);
 }
@@ -210,7 +211,7 @@ sub hash_hex {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -250,7 +251,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

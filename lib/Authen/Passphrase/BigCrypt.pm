@@ -29,7 +29,7 @@ An object of this class encapsulates a passphrase hashed using the
 "bigcrypt" hash function found in HP-UX, Digital Unix, OSF/1, and some
 other flavours of Unix.  Do not confuse this with the "crypt16" found
 on Ultrix and Tru64 (for which see L<Authen::Passphrase::Crypt16>).
-This is a subclass of C<Authen::Passphrase>, and this document assumes
+This is a subclass of L<Authen::Passphrase>, and this document assumes
 that the reader is familiar with the documentation for that class.
 
 This is a derivation of the original DES-based crypt function found on all
@@ -75,7 +75,7 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.08 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -164,8 +164,10 @@ sub new {
 					+\z#x
 				or croak "\"$value\" is not a valid ".
 						"encoded hash";
-			push @hashes, base64_to_block($1)
-				while $value =~ /(.{11})/sg;
+			while($value =~ /(.{11})/sg) {
+				my $b64 = $1;
+				push @hashes, base64_to_block($b64);
+			}
 		} elsif($attr eq "passphrase") {
 			croak "passphrase specified redundantly"
 				if @hashes || defined($passphrase);
@@ -243,7 +245,7 @@ sub hash_base64 { join("", map { $_->hash_base64 } @{$_[0]}) }
 
 =item $ppr->sections
 
-Returns a reference to an array of C<Authen::Passphrase::DESCrypt>
+Returns a reference to an array of L<Authen::Passphrase::DESCrypt>
 passphrase recognisers for the sections of the passphrase.
 
 =cut
@@ -252,7 +254,7 @@ sub sections { [ @{$_[0]} ] }
 
 =item $ppr->match(PASSPHRASE)
 
-This method is part of the standard C<Authen::Passphrase> interface.
+This method is part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -281,7 +283,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

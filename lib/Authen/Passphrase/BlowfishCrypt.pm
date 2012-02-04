@@ -41,15 +41,16 @@ Unix crypt()
 
 An object of this class encapsulates a passphrase hashed using the
 Blowfish-based Unix crypt() hash function, known as "bcrypt".  This is
-a subclass of C<Authen::Passphrase>, and this document assumes that the
+a subclass of L<Authen::Passphrase>, and this document assumes that the
 reader is familiar with the documentation for that class.
 
 The crypt() function in a modern Unix actually supports several different
 passphrase schemes.  This class is concerned only with one particular
 scheme, a Blowfish-based algorithm designed by Niels Provos and David
 Mazieres for OpenBSD.  To handle the whole range of passphrase schemes
-supported by the modern crypt(), see the C<from_crypt> constructor and
-the C<as_crypt> method in L<Authen::Passphrase>.
+supported by the modern crypt(), see the
+L<from_crypt|Authen::Passphrase/from_crypt> constructor and the
+L<as_crypt|Authen::Passphrase/as_crypt> method in L<Authen::Passphrase>.
 
 The Blowfish-based crypt() scheme uses a variant of Blowfish called
 "Eksblowfish", for "expensive key schedule Blowfish".  It has the
@@ -77,6 +78,15 @@ applications where this requirement exists.  If that is not a concern,
 and it suffices to merely make brute force the most efficient attack, see
 L<Authen::Passphrase::SaltedDigest> for more efficient hash algorithms.
 
+Choice of the cost parameter is critical, due to the need to trade off
+expense of brute-force attack against speed of legitimate passphrase
+verification.  A traditional target is that verification should take
+about one second on widely-available hardware.  (Algorithms that are
+concerned about brute force speed but lack a cost parameter have often
+aimed for this, with respect to hardware available at the time of the
+algorithm's introduction.)  As of 2011, this is achieved with a cost
+parameter around 14.
+
 =cut
 
 package Authen::Passphrase::BlowfishCrypt;
@@ -90,7 +100,7 @@ use Carp qw(croak);
 use Crypt::Eksblowfish::Bcrypt 0.008 qw(bcrypt_hash en_base64 de_base64);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -233,8 +243,9 @@ sub from_crypt {
 		$passwd =~ m#\A\$2(a?)\$([0-9]{2})\$
 				([./A-Za-z0-9]{22})([./A-Za-z0-9]{31})\z#x
 			or croak "malformed $1 data";
-		return $class->new(key_nul => $1, cost => $2,
-				   salt_base64 => $3, hash_base64 => $4);
+		my($kn, $cost, $salt, $hash) = ($1, $2, $3, $4);
+		return $class->new(key_nul => $kn, cost => $cost,
+				   salt_base64 => $salt, hash_base64 => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -277,7 +288,7 @@ sub cost {
 
 =item $ppr->keying_nrounds_log2
 
-Synonym for C<cost>.
+Synonym for L</cost>.
 
 =cut
 
@@ -333,7 +344,7 @@ sub hash_base64 {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -372,7 +383,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

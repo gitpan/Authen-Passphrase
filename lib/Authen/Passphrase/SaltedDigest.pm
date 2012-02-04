@@ -36,7 +36,7 @@ digest algorithm
 
 An object of this class encapsulates a passphrase hashed using
 a generic digest-algorithm-based scheme.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The salt is an arbitrary string of bytes.  It is appended to passphrase,
@@ -78,10 +78,10 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest 1.00;
 use MIME::Base64 2.21 qw(encode_base64 decode_base64);
-use Module::Runtime 0.006 qw(is_valid_module_name use_module);
+use Module::Runtime 0.011 qw(is_valid_module_name use_module);
 use Params::Classify 0.000 qw(is_string is_blessed);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -99,22 +99,23 @@ digest algorithm.  The following attributes may be given:
 =item B<algorithm>
 
 Specifies the algorithm to use.  If it is a reference to a blessed object,
-it must be possible to call the C<new> method on that object to generate
+it must be possible to call the L</new> method on that object to generate
 a digest context object.
 
 If it is a string containing the subsequence "::" then it specifies
 a module to use.  A plain package name in bareword syntax, optionally
 preceded by "::" (so that top-level packages can be recognised as such),
-is taken as a class name, on which the C<new> method will be called to
+is taken as a class name, on which the L</new> method will be called to
 generate a digest context object.  The package name may optionally be
 followed by "-" to cause automatic loading of the module, and the "-"
 (if present) may optionally be followed by a version number that will
 be checked against.  For example, "Digest::MD5-1.99_53" would load the
-C<Digest::MD5> module and check that it is at least version 1.99_53
+L<Digest::MD5> module and check that it is at least version 1.99_53
 (which is the first version that can be used by this module).
 
-A string not containing "::" and which is understood by C<< Digest->new >>
-will be passed to that function to generate a digest context object.
+A string not containing "::" and which is understood by
+L<< Digest->new|Digest/"OO INTERFACE" >> will be passed to that function
+to generate a digest context object.
 
 Any other type of algorithm specifier has undefined behaviour.
 
@@ -261,7 +262,8 @@ sub from_rfc2307 {
 			  ((?>(?:[A-Za-z0-9+/]{4})*)
 			   (?:|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=|
 			       [A-Za-z0-9+/][AQgw]==))\z#x;
-	my $hash_and_salt = decode_base64($1);
+	my $b64 = $1;
+	my $hash_and_salt = decode_base64($b64);
 	my($algorithm, $hash_len, $salt_allowed) = @$meaning;
 	croak "insufficient hash data for {$scheme}"
 		if length($hash_and_salt) < $hash_len;
@@ -338,7 +340,7 @@ sub hash_hex {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 Only passphrase recognisers using certain well-known digest algorithms
 can be represented in RFC 2307 form.
 
@@ -435,7 +437,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

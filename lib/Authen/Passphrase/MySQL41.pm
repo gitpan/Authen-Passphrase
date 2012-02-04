@@ -22,7 +22,7 @@ Authen::Passphrase::MySQL41 - passphrases using the MySQL v4.1 algorithm
 
 An object of this class encapsulates a passphrase hashed using the
 algorithm used by MySQL from version 4.1.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The MySQL v4.1 hash scheme is based on the SHA-1 digest algorithm.
@@ -46,9 +46,9 @@ use strict;
 
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
-use Digest::SHA1 qw(sha1);
+use Digest::SHA qw(sha1);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -147,7 +147,7 @@ sub hash_hex {
 
 =item $ppr->match(PASSPHRASE)
 
-This method is part of the standard C<Authen::Passphrase> interface.
+This method is part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -166,7 +166,7 @@ sub match {
 =head1 SEE ALSO
 
 L<Authen::Passphrase>,
-L<Digest::SHA1>
+L<Digest::SHA>
 
 =head1 AUTHOR
 
@@ -174,7 +174,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

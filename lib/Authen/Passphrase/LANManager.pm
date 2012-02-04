@@ -30,7 +30,7 @@ hash algorithm
 
 An object of this class encapsulates a passphrase hashed using
 the Microsoft LAN Manager hash function.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The hash algorithm can be used on up to fourteen Latin-1 characters of
@@ -59,7 +59,7 @@ use Authen::Passphrase 0.003;
 use Authen::Passphrase::LANManagerHalf;
 use Carp qw(croak);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -158,7 +158,8 @@ sub from_rfc2307 {
 	if($userpassword =~ /\A\{(?i:lanm(?:an)?)\}/) {
 		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})\z/
 			or croak "malformed {LANMAN} data";
-		return $class->new(hash_hex => $1);
+		my $hash = $1;
+		return $class->new(hash_hex => $hash);
 	}
 	return $class->SUPER::from_rfc2307($userpassword);
 }
@@ -194,7 +195,7 @@ sub hash_hex {
 =item $ppr->first_half
 
 Returns the hash of the first half of the passphrase, as an
-C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
+L<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 
 =cut
 
@@ -206,7 +207,7 @@ sub first_half {
 =item $ppr->second_half
 
 Returns the hash of the second half of the passphrase, as an
-C<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
+L<Authen::Passphrase::LANManagerHalf> passphrase recogniser.
 
 =cut
 
@@ -219,7 +220,7 @@ sub second_half {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -257,7 +258,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

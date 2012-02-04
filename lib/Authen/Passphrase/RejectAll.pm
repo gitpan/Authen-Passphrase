@@ -22,7 +22,7 @@ Authen::Passphrase::RejectAll - reject all passphrases
 =head1 DESCRIPTION
 
 An object of this class is a passphrase recogniser that accepts any
-passphrase whatsoever.  This is a subclass of C<Authen::Passphrase>, and
+passphrase whatsoever.  This is a subclass of L<Authen::Passphrase>, and
 this document assumes that the reader is familiar with the documentation
 for that class.
 
@@ -42,7 +42,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -101,8 +101,8 @@ followed by an acceptable crypt string.
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
-The C<match> method always returns false.
+These methods are part of the standard L<Authen::Passphrase> interface.
+The L</match> method always returns false.
 
 =cut
 
@@ -122,7 +122,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

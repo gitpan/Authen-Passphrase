@@ -30,7 +30,7 @@ An object of this class encapsulates a passphrase hashed using the
 "crypt16" hash function found in Ultrix and Tru64.  Do not confuse
 this with the "bigcrypt" found on HP-UX, Digital Unix, and OSF/1 (for
 which see L<Authen::Passphrase::BigCrypt>).  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 This is a derivation of the original DES-based crypt function found on all
@@ -72,7 +72,7 @@ use Carp qw(croak);
 use Crypt::UnixCrypt_XS 0.08 qw(base64_to_block base64_to_int12);
 use Data::Entropy::Algorithms 0.000 qw(rand_int);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -252,7 +252,7 @@ sub hash_base64 {
 =item $ppr->first_half
 
 Returns the hash of the first half of the passphrase, as an
-C<Authen::Passphrase::DESCrypt> passphrase recogniser.
+L<Authen::Passphrase::DESCrypt> passphrase recogniser.
 
 =cut
 
@@ -264,7 +264,7 @@ sub first_half {
 =item $ppr->second_half
 
 Returns the hash of the second half of the passphrase, as an
-C<Authen::Passphrase::DESCrypt> passphrase recogniser.
+L<Authen::Passphrase::DESCrypt> passphrase recogniser.
 
 =cut
 
@@ -275,7 +275,7 @@ sub second_half {
 
 =item $ppr->match(PASSPHRASE)
 
-This method is part of the standard C<Authen::Passphrase> interface.
+This method is part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -299,7 +299,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

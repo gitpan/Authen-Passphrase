@@ -18,7 +18,7 @@ Authen::Passphrase::Clear - cleartext passphrases
 
 An object of this class is a passphrase recogniser that accepts
 some particular passphrase which it knows.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 I<Warning:> Storing a passphrase in cleartext, as this class does,
@@ -37,7 +37,7 @@ use strict;
 use Authen::Passphrase 0.003;
 use Carp qw(croak);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -73,7 +73,8 @@ sub from_rfc2307 {
 	if($userpassword =~ /\A\{(?i:cleartext)\}/) {
 		$userpassword =~ /\A\{.*?\}([!-~]*)\z/
 			or croak "malformed {CLEARTEXT} data";
-		return $class->new($1);
+		my $text = $1;
+		return $class->new($text);
 	}
 	return $class->SUPER::from_rfc2307($userpassword);
 }
@@ -90,8 +91,8 @@ sub from_rfc2307 {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
-The C<passphrase> method trivially works.
+These methods are part of the standard L<Authen::Passphrase> interface.
+The L</passphrase> method trivially works.
 
 =cut
 
@@ -121,7 +122,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

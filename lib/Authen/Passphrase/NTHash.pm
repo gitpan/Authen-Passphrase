@@ -29,7 +29,7 @@ Authen::Passphrase::NTHash - passphrases using the NT-Hash algorithm
 =head1 DESCRIPTION
 
 An object of this class encapsulates a passphrase hashed using the NT-Hash
-function.  This is a subclass of C<Authen::Passphrase>, and this document
+function.  This is a subclass of L<Authen::Passphrase>, and this document
 assumes that the reader is familiar with the documentation for that class.
 
 The NT-Hash scheme is based on the MD4 digest algorithm.  Up to 128
@@ -52,7 +52,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Digest::MD4 1.2 qw(md4);
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -136,11 +136,13 @@ sub from_crypt {
 	if($passwd =~ /\A\$3\$/) {
 		$passwd =~ m#\A\$3\$\$([0-9a-f]{32})\z#
 			or croak "malformed \$3\$ data";
-		return $class->new(hash_hex => $1);
+		my $hash = $1;
+		return $class->new(hash_hex => $hash);
 	} elsif($passwd =~ /\A\$NT\$/) {
 		$passwd =~ m#\A\$NT\$([0-9a-f]{32})\z#
 			or croak "malformed \$NT\$ data";
-		return $class->new(hash_hex => $1);
+		my $hash = $1;
+		return $class->new(hash_hex => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -160,7 +162,8 @@ sub from_rfc2307 {
 	if($userpassword =~ /\A\{(?i:msnt)\}/) {
 		$userpassword =~ /\A\{.*?\}([0-9a-fA-F]{32})\z/
 			or croak "malformed {MSNT} data";
-		return $class->new(hash_hex => $1);
+		my $hash = $1;
+		return $class->new(hash_hex => $hash);
 	}
 	return $class->SUPER::from_rfc2307($userpassword);
 }
@@ -199,7 +202,7 @@ sub hash_hex {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -238,7 +241,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

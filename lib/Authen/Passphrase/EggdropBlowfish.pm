@@ -22,7 +22,7 @@ blowfish.mod
 
 An object of this class encapsulates a passphrase hashed using the
 Blowfish-based algorithm used in Eggdrop's blowfish.mod.  This is a
-subclass of C<Authen::Passphrase>, and this document assumes that the
+subclass of L<Authen::Passphrase>, and this document assumes that the
 reader is familiar with the documentation for that class.
 
 This hash scheme uses no salt, and does not accept a zero-length
@@ -54,7 +54,7 @@ use Authen::Passphrase 0.003;
 use Carp qw(croak);
 use Crypt::Eksblowfish::Uklblowfish 0.008;
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -183,7 +183,7 @@ sub hash_base64 {
 
 =item $ppr->match(PASSPHRASE)
 
-This method is part of the standard C<Authen::Passphrase> interface.
+This method is part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -213,7 +213,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

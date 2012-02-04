@@ -38,7 +38,7 @@ Authen::Passphrase::PHPass - passphrases using the phpass algorithm
 An object of this class encapsulates a passphrase hashed using
 the phpass algorithm invented by Solar Designer and described
 at L<http://www.openwall.com/phpass/>.  This is a subclass of
-C<Authen::Passphrase>, and this document assumes that the reader is
+L<Authen::Passphrase>, and this document assumes that the reader is
 familiar with the documentation for that class.
 
 The phpass algorithm is based on the MD5 message digest algorithm.
@@ -47,7 +47,7 @@ consist of base 64 digits.  There is also a cost parameter that controls
 the expense of hashing.  First the salt and passphrase are concatenated
 and hashed by MD5.  Then, 2^cost times, the hash from the previous stage
 is concatenated with the passphrase and hashed by MD5.  The passphrase
-hash is the ouptut from the final iteration.
+hash is the output from the final iteration.
 
 The passphrase hash is represented in ASCII using the crypt format with
 prefix "B<$P$>".  The first character after the format prefix is a base 64
@@ -69,7 +69,7 @@ use Carp qw(croak);
 use Data::Entropy::Algorithms 0.000 qw(rand_bits);
 use Digest::MD5 1.99_53 ();
 
-our $VERSION = "0.007";
+our $VERSION = "0.008";
 
 use parent "Authen::Passphrase";
 
@@ -248,8 +248,9 @@ sub from_crypt {
 		$passwd =~ m#\A\$P\$([./0-9A-Za-z])([!-9;-~]{8})
 				([./0-9A-Za-z]{22})\z#x
 			or croak "malformed \$P\$ data";
-		return $class->new(cost_base64 => $1, salt => $2,
-			hash_base64 => $3);
+		my($cost, $salt, $hash) = ($1, $2, $3);
+		return $class->new(cost_base64 => $cost, salt => $salt,
+			hash_base64 => $hash);
 	}
 	return $class->SUPER::from_crypt($passwd);
 }
@@ -292,7 +293,7 @@ sub cost_base64 {
 
 =item $ppr->nrounds_log2
 
-Synonym for C<cost>.
+Synonym for L</cost>.
 
 =cut
 
@@ -300,7 +301,7 @@ Synonym for C<cost>.
 
 =item $ppr->nrounds_log2_base64
 
-Synonym for C<cost_base64>.
+Synonym for L</cost_base64>.
 
 =cut
 
@@ -345,7 +346,7 @@ sub hash_base64 {
 
 =item $ppr->as_rfc2307
 
-These methods are part of the standard C<Authen::Passphrase> interface.
+These methods are part of the standard L<Authen::Passphrase> interface.
 
 =cut
 
@@ -389,7 +390,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, 2007, 2009, 2010
+Copyright (C) 2006, 2007, 2009, 2010, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE

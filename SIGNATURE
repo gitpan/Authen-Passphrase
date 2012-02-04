@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.64.
+signed via the Module::Signature module, version 0.68.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,32 +14,33 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 0ad3ed14e18f6a1a6846884371ef7e8d79c8dc2b .cvsignore
-SHA1 ae22d1df85e28423f5922f8c0edfd68f432c1622 Build.PL
-SHA1 a63082ccd1ed77571e383f33efa0077f78d4b50e Changes
-SHA1 57819ff9232fde9c8f3425b52dc5409ec40c0e13 MANIFEST
-SHA1 9199295615dbad3e772f09e43c5fbf160996e797 META.yml
-SHA1 caae608231ffe78390c76451ade51a7cfc87a9f9 Makefile.PL
-SHA1 d28d9615dba876f29415425305a29f74360a6e9f README
-SHA1 3a365ebcdd2196e9186b43672ac3b1b08bfe3a59 lib/Authen/Passphrase.pm
-SHA1 3d0ecc810d838c7e10c0b1a9b712865031029998 lib/Authen/Passphrase/AcceptAll.pm
-SHA1 e2400ef277aec3664cf46d2a0a79d8b47ee3e0ed lib/Authen/Passphrase/BigCrypt.pm
-SHA1 e4720e0252acf9468cf355b98d27c5f66b9c013a lib/Authen/Passphrase/BlowfishCrypt.pm
-SHA1 4dfe73e50ce7248821480f33af0887f3ba231ec4 lib/Authen/Passphrase/Clear.pm
-SHA1 9912ffd84d1c342c4b56abb4397c5a688df9c97c lib/Authen/Passphrase/Crypt16.pm
-SHA1 81e280778f131f8115ec8bd0f11be6cb094902aa lib/Authen/Passphrase/DESCrypt.pm
-SHA1 d8fed5ee17fe955da1197847f792900457a1f223 lib/Authen/Passphrase/EggdropBlowfish.pm
-SHA1 2f023c6c4ebd1edb15fa3debae42a81684bba33e lib/Authen/Passphrase/LANManager.pm
-SHA1 653522e7e98bd8251eaddf5995491ebc8a4c6d34 lib/Authen/Passphrase/LANManagerHalf.pm
-SHA1 5fd137a0ebe454691bb8ccd21b1eecbd18181a10 lib/Authen/Passphrase/MD5Crypt.pm
-SHA1 e7846735a3c4937b270bed0568c348dc02c8dda1 lib/Authen/Passphrase/MySQL323.pm
-SHA1 58562839e4397d878ab9932bcfa2e272df50d322 lib/Authen/Passphrase/MySQL41.pm
-SHA1 95f0c0564646ca65f92d377d694e86b0a4cb6c21 lib/Authen/Passphrase/NTHash.pm
-SHA1 be0cdfab4fcc8020231b9fa1a1ccd465ec607c52 lib/Authen/Passphrase/NetscapeMail.pm
-SHA1 3cb6370c740935dc6811eb7299234e3cbbae2eb2 lib/Authen/Passphrase/PHPass.pm
-SHA1 4d6eb5a2055c3a6eea08459d9755ba7f34a87c1c lib/Authen/Passphrase/RejectAll.pm
-SHA1 698ce866107c4a7d756551991849be574685492f lib/Authen/Passphrase/SaltedDigest.pm
-SHA1 75b61dfd802ac243f078a556a55275a48c4df01d lib/Authen/Passphrase/VMSPurdy.pm
+SHA1 4ff607a9628b3a53d1d5f493d07f80c62e05a1cc .gitignore
+SHA1 35ad1741a2e8227aa927f65735bc60253412a468 Build.PL
+SHA1 66892da20c7745991fd39ca7b1d3760d532a3a97 Changes
+SHA1 b3dbe8d80575d887abec73ceb39d52596e510571 MANIFEST
+SHA1 61126660bd129b1f4b1dc9cf2477ffa1049dc93a META.json
+SHA1 683a1207e98036d1af45f84afa1f32c68db5c7da META.yml
+SHA1 a4df8e97ccd390a42212af5a9f4d0986c85e7a5f Makefile.PL
+SHA1 4ce3500e0561cedc483673a918e6da960b169bda README
+SHA1 9e0c16edc63873594d30d569537d469ca7b21bf7 lib/Authen/Passphrase.pm
+SHA1 a023195088f0aae1a528fbb2911a606041b05b48 lib/Authen/Passphrase/AcceptAll.pm
+SHA1 46869a335237a2710ee4766fcd457b8b51b56a85 lib/Authen/Passphrase/BigCrypt.pm
+SHA1 c258c203f227b3edefeb20add41a9c3d2d5a45da lib/Authen/Passphrase/BlowfishCrypt.pm
+SHA1 8ef489ef2319e2d32208ccfc161def8692fa2fbb lib/Authen/Passphrase/Clear.pm
+SHA1 d221e22b9248ad5d25ee2b1b2a298083ab1fcbca lib/Authen/Passphrase/Crypt16.pm
+SHA1 336e4289f8dabb81dabfee444d0d0e082d2098f3 lib/Authen/Passphrase/DESCrypt.pm
+SHA1 c8115f18ecf9311fab5eaccd02692fd7fdd7be6d lib/Authen/Passphrase/EggdropBlowfish.pm
+SHA1 a02b462c3c62a34df09e3f36e2779dfc7823a50d lib/Authen/Passphrase/LANManager.pm
+SHA1 3709df52ff5709859ef14995810b1a450102f7ad lib/Authen/Passphrase/LANManagerHalf.pm
+SHA1 3ef6611b31b3c9f7f3df0720dc3366fe5f4c3f7a lib/Authen/Passphrase/MD5Crypt.pm
+SHA1 b55f6385b2a72a3c54c3a02fe80a5fadcbedff91 lib/Authen/Passphrase/MySQL323.pm
+SHA1 4e54f5b1745ddf18b353917f849c96606187d843 lib/Authen/Passphrase/MySQL41.pm
+SHA1 67c654ee5ccd3fb9e9c81bf1ce62cd76ea68631a lib/Authen/Passphrase/NTHash.pm
+SHA1 c945e262da2dbaaa560c62ec96452b87da03b6cf lib/Authen/Passphrase/NetscapeMail.pm
+SHA1 5ebc6d58d440440b0649b5eeb32c06cb9640bdf6 lib/Authen/Passphrase/PHPass.pm
+SHA1 e9435e9f46ed4b168746f2ee4a2a7770c5f391cc lib/Authen/Passphrase/RejectAll.pm
+SHA1 c681e467e3ad1dceb49ad85845ab6a0b4f4b4b35 lib/Authen/Passphrase/SaltedDigest.pm
+SHA1 c899b1dd540b115ac8274649c0ac1ed76eea72c0 lib/Authen/Passphrase/VMSPurdy.pm
 SHA1 701b95f420406bb412f27ce12bbabd4e2c388284 t/acceptall.t
 SHA1 c3888dbc795188d78a5498fed6167143d9aaed8f t/bigcrypt.t
 SHA1 a62299eeccc77e682893549122cba19558b6f5b9 t/blowfishcrypt.t
@@ -65,9 +66,9 @@ SHA1 dec2ee0c0b163930850cf1942485877a855fe45d t/ssha.t
 SHA1 c9ef4b2237f83808e82f864775684a42c1a4f43c t/traddescrypt.t
 SHA1 66c4083e0684fdc049a1fdcff3e93f0cdf80e120 t/vmspurdy.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkxTHMMACgkQOV9mt2VyAVG/IACfaEa8AkUpwk7edCrT1N4QxcxY
-lhkAn2ZccdTQroMtTuvHFr20PD0gMkyy
-=jK0V
+iEYEARECAAYFAk8tO34ACgkQOV9mt2VyAVHkAACeMgXakr7kFcTJWZdRKkMigwe0
+kc0AmgM9GAbozkMGecF0mB2/066nzQyy
+=k1za
 -----END PGP SIGNATURE-----
