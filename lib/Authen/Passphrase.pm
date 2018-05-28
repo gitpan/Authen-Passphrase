@@ -289,22 +289,24 @@ my %crypt_scheme_handler = (
 
 sub from_crypt {
 	my($class, $passwd) = @_;
-	croak "crypt string \"$passwd\" not supported for $class"
-		unless $class eq __PACKAGE__;
 	my $handler;
 	if($passwd =~ /\A\$([0-9A-Za-z]+)\$/) {
 		my $scheme = $1;
 		$handler = $crypt_scheme_handler{$scheme};
 		croak "unrecognised crypt scheme \$$scheme\$"
 			unless defined $handler;
-	} elsif($passwd =~ m#\A(?:[^\$].{12}|_.{19})\z#s) {
-		$handler = [ "Authen::Passphrase::DESCrypt", 0.006 ];
-	} elsif($passwd eq "") {
-		$handler = [ "Authen::Passphrase::AcceptAll", 0.003 ];
-	} elsif($passwd =~ /\A[^\$].{0,11}\z/s) {
-		$handler = [ "Authen::Passphrase::RejectAll", 0.003 ];
 	} else {
-		croak "bad crypt syntax in \"$passwd\"";
+		croak "crypt string \"$passwd\" not supported for $class"
+			unless $class eq __PACKAGE__;
+		if($passwd =~ m#\A(?:[^\$].{12}|_.{19})\z#s) {
+			$handler = [ "Authen::Passphrase::DESCrypt", 0.006 ];
+		} elsif($passwd eq "") {
+			$handler = [ "Authen::Passphrase::AcceptAll", 0.003 ];
+		} elsif($passwd =~ /\A[^\$].{0,11}\z/s) {
+			$handler = [ "Authen::Passphrase::RejectAll", 0.003 ];
+		} else {
+			croak "bad crypt syntax in \"$passwd\"";
+		}
 	}
 	if(ref($handler) eq "CODE") {
 		return $handler->($passwd);
